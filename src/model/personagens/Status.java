@@ -36,6 +36,7 @@ public class Status {
     public int getPontosAcao() { return pontosAcao; }
     public double getChanceCritico() { return chanceCritico; }
     public int getPrioridadeTurno() { return prioridadeTurno; }
+    public void setVidaAtual(int vidaAtual) {this.vidaAtual = vidaAtual;}
 
     public void setPontosAcao(int pontosAcao) { this.pontosAcao = pontosAcao; }
 }
