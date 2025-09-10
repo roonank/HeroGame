@@ -8,6 +8,5 @@ public enum TipoEfeito {
     DEBUFF_ATAQUE,
     DEBUFF_DEFESA,
     STUN,
-    DOT,
     HOT
 }

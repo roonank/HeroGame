@@ -12,7 +12,7 @@ public class Personagem implements IAtacante, IAtacavel {
     protected Habilidade habilidadeEspecial;
     protected int pontosDisponiveis;
 
-    public Personagem(String nome, Atributos atributos) {
+    public Personagem(String nome, Atributos atributos, Status status) {
         this.nome = nome;
         this.atributos = atributos;
         this.status = new Status(atributos);
