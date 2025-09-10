@@ -9,13 +9,20 @@ public class Personagem implements IAtacante, IAtacavel {
     protected String nome;
     protected Atributos atributos;
     protected Status status;
+    protected Habilidade habilidadeEspecial;
     protected int pontosDisponiveis;
 
     public Personagem(String nome, Atributos atributos, Status status) {
         this.nome = nome;
         this.atributos = atributos;
-        this.status = status;
+        this.status = new Status(atributos);
         this.pontosDisponiveis = 50;
+    }
+
+    public void ataqueBasico(Personagem inimigo) {
+        int dano = 10;
+        inimigo.receberDano(dano);
+        System.out.println(nome + " realizou um ataque básico e causou " + dano + " de dano em " + inimigo.getNome());
     }
 
     @Override
