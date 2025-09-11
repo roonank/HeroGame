@@ -4,11 +4,11 @@ import model.personagens.Atributos;
 import model.personagens.Personagem;
 import model.personagens.Status;
 
-public class Gilgamesh extends Personagem {
+public class Perseu  extends Personagem {
 
-    public Gilgamesh() {
+    public Perseu () {
         super(
-                "Gilgamesh",
+                "Perseu ",
                 new Atributos(10, 8, 17, 5),
                 new Status( new Atributos(10, 8, 17, 5))
         );

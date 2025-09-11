@@ -1,14 +1,13 @@
 package Controller;
 
 import model.personagens.Personagem;
-import model.personagens.herois.Gilgamesh;
+import model.personagens.deuses.egipcios.*;
+import model.personagens.herois.Aquiles;
 import model.personagens.herois.Hercules;
-import model.personagens.herois.Ragnar;
+import model.personagens.herois.Perseu;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Scanner;
+
+import java.util.*;
 
 
 public class TorreController {
@@ -18,63 +17,92 @@ public class TorreController {
 
     public TorreController() {
         this.inimigos = new ArrayList<>();
-        inimigos.add(new Gilgamesh());
-        inimigos.add(new Hercules());
-        inimigos.add(new Ragnar());
     }
 
     public void iniciarTorre() {
-        Gilgamesh gilgamesh = new Gilgamesh();
+        Aquiles aquiles = new Aquiles();
         Hercules hercules = new Hercules();
-        Ragnar ragnar = new Ragnar();
+        Perseu perseu = new Perseu();
 
         System.out.println("🏛️ Bem-vindo à Torre dos Deuses!");
         System.out.println("Escolha seu herói:");
-        System.out.println("1 - " + gilgamesh.getNome() + " | " + gilgamesh.getAtributos().toString());
+        System.out.println("1 - " + aquiles.getNome() + " | " + aquiles.getAtributos().toString());
         System.out.println("2 - " + hercules.getNome() + " | " + hercules.getAtributos().toString());
-        System.out.println("3 - " + ragnar.getNome() + " | " + ragnar.getAtributos().toString());
+        System.out.println("3 - " + perseu.getNome() + " | " + perseu.getAtributos().toString());
 
         int escolha = scanner.nextInt();
         switch (escolha) {
-            case 1 -> jogador = new Gilgamesh();
+            case 1 -> jogador = new Aquiles();
             case 2 -> jogador = new Hercules();
-            case 3 -> jogador = new Ragnar();
+            case 3 -> jogador = new Perseu();
             default -> {
-                System.out.println("Opção inválida, selecionando Gilgamesh por padrão.");
-                jogador = new Gilgamesh();
+                System.out.println("Opção inválida, selecionando Aquiles por padrão.");
+                jogador = new Aquiles();
             }
         }
 
         distribuirPontosJogador(jogador);
 
         System.out.println("Você escolheu: " + jogador.getNome());
+
+        carregarInimigos();
+
+
         System.out.println("Iniciando a subida na torre...\n");
 
-        inimigos.removeIf(inimigo -> inimigo.getNome().equals(jogador.getNome()));
-
         Random random = new Random();
-        for (int andar = 1; andar <= inimigos.size(); andar++) {
+        for (int andar = 0; andar < inimigos.size(); andar++) {
             Personagem inimigo = inimigos.get(random.nextInt(inimigos.size()));
-            System.out.println("Andar " + andar + ": Você encontrou " + inimigo.getNome() + "!");
+            System.out.println("Andar " + (andar+1) + ": Você encontrou " + inimigo.getNome() + "!");
 
             BatalhaController batalha = new BatalhaController(jogador, inimigo);
             boolean venceu = batalha.iniciarBatalha();
 
             if (venceu) {
-                System.out.println(jogador.getNome() + " venceu a batalha e sobe para o próximo andar!\n");
                 jogador.getStatus().setPontosAcao(jogador.getStatus().getPontosAcao() + 3);
                 jogador.getStatus().setVidaAtual(jogador.getStatus().getVidaAtual() + 10);
-                System.out.println(jogador.getNome() + " recuperou 10 pontos de vida! (Agora: " + jogador.getStatus().getVidaAtual());
+                System.out.println(jogador.getNome() + " recuperou 10 pontos de vida! (Agora: " + jogador.getStatus().getVidaAtual() + ")");
             } else {
                 System.out.println(jogador.getNome() + " foi derrotado na torre!");
                 return;
             }
-
-
-            System.out.println("Parabéns! Você conquistou a Torre dos Deuses!");
         }
+        System.out.println("Parabéns! Você conquistou a Torre dos Deuses!");
     }
 
+    private void carregarInimigos() {
+        inimigos.clear(); // limpa a lista antes de adicionar
+
+        System.out.println("Escolha a mitologia do inimigo:");
+        System.out.println("1 - Deuses Gregos");
+        System.out.println("2 - Deuses Egípcios");
+        int inimigo = scanner.nextInt();
+
+        switch (inimigo) {
+            case 1 -> {
+//                inimigos.add(new Ares());
+//                inimigos.add(new Atena());
+//                inimigos.add(new Hades());
+//                inimigos.add(new Poseidon());
+//                inimigos.add(new Zeus());
+            }
+            case 2 -> {
+                inimigos.add( new Anubis());
+                inimigos.add(new Horus());
+                inimigos.add(new Isis());
+                inimigos.add(new Osiris());
+                inimigos.add(new Ra());
+                            }
+            default -> {
+                System.out.println("Opção inválida, selecionando Deuses Gregos por padrão.");
+//                inimigos.add(new Ares());
+//                inimigos.add(new Atena());
+//                inimigos.add(new Hades());
+//                inimigos.add(new Poseidon());
+//                inimigos.add(new Zeus());
+            }
+        }
+    }
 
     public void distribuirPontosJogador(Personagem jogador) {
         Scanner scanner = new Scanner(System.in);

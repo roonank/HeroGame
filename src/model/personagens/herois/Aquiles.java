@@ -4,11 +4,11 @@ import model.personagens.Atributos;
 import model.personagens.Personagem;
 import model.personagens.Status;
 
-public class Ragnar extends Personagem {
+public class Aquiles extends Personagem {
 
-    public Ragnar() {
+    public Aquiles() {
         super(
-                "Ragnar",
+                "Aquiles",
                 new Atributos(13, 18, 10, 8),
                 new Status(new Atributos(13, 18, 10, 8))
         );

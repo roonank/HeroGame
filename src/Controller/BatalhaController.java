@@ -35,7 +35,6 @@ public class BatalhaController {
                     jogador.atacar(inimigo);
                 }
                 case 2 -> {
-
                 }
                 case 3 -> {
                 }
