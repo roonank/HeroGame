@@ -35,14 +35,25 @@ public class Personagem implements IAtacante, IAtacavel {
         return status.getVidaAtual() > 0;
     }
 
-    public String getNome() { return nome; }
-    public Atributos getAtributos() { return atributos; }
-    public Status getStatus() { return status; }
-    public int getPontosDisponiveis() { return pontosDisponiveis; }
+    public String getNome() {
+        return nome;
+    }
+
+    public Atributos getAtributos() {
+        return atributos;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public int getPontosDisponiveis() {
+        return pontosDisponiveis;
+    }
 
     public void distribuirPontos(String atributo, int quantidade) {
         if (quantidade <= pontosDisponiveis) {
-            switch (atributo.toLowerCase()){
+            switch (atributo.toLowerCase()) {
                 case "forca" -> this.atributos.aumentarForca(quantidade);
                 case "agilidade" -> this.atributos.aumentarAgilidade(quantidade);
                 case "inteligencia" -> this.atributos.aumentarInteligencia(quantidade);

@@ -13,7 +13,7 @@ public class Status {
     }
 
     public void calcularStatus(Atributos atributos) {
-        this.vidaMaxima = 50 + (atributos.getForca() * 2) + (atributos.getConstituicao()*5);
+        this.vidaMaxima = 50 + (atributos.getForca() * 2) + (atributos.getConstituicao() * 5);
         this.defesa = 10 + (atributos.getConstituicao() / 2);
         this.pontosAcao = 6;
         this.chanceCritico = 0.05 + (atributos.getAgilidade() * 0.01);
@@ -26,16 +26,43 @@ public class Status {
         }
     }
 
-    public void reduzirVida(int dano) { this.vidaAtual = Math.max(0, this.vidaAtual - dano); }
+    public void reduzirVida(int dano) {
+        this.vidaAtual = Math.max(0, this.vidaAtual - dano);
+    }
 
-    public void recuperarVida(int cura){ this.vidaAtual = Math.min(this.vidaMaxima, this.vidaAtual + cura); }
+    public void recuperarVida(int cura) {
+        this.vidaAtual = Math.min(this.vidaMaxima, this.vidaAtual + cura);
+    }
 
-    public int getVidaMaxima() { return vidaMaxima; }
-    public int getVidaAtual() { return vidaAtual; }
-    public int getDefesa() { return defesa; }
-    public int getPontosAcao() { return pontosAcao; }
-    public double getChanceCritico() { return chanceCritico; }
-    public int getPrioridadeTurno() { return prioridadeTurno; }
+    public int getVidaMaxima() {
+        return vidaMaxima;
+    }
 
-    public void setPontosAcao(int pontosAcao) { this.pontosAcao = pontosAcao; }
+    public int getVidaAtual() {
+        return vidaAtual;
+    }
+
+    public int getDefesa() {
+        return defesa;
+    }
+
+    public int getPontosAcao() {
+        return pontosAcao;
+    }
+
+    public double getChanceCritico() {
+        return chanceCritico;
+    }
+
+    public int getPrioridadeTurno() {
+        return prioridadeTurno;
+    }
+
+    public void setVidaAtual(int vidaAtual) {
+        this.vidaAtual = vidaAtual;
+    }
+
+    public void setPontosAcao(int pontosAcao) {
+        this.pontosAcao = pontosAcao;
+    }
 }
