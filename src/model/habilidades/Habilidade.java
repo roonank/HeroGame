@@ -1,54 +1,50 @@
 package model.habilidades;
 
-import model.habilidades.TipoEfeito;
-
 public class Habilidade {
     private String nome;
-    private String descricao;
-    private int custoMana;        // custo de energia/mana/estamina
-    private int danoBase;         // dano inicial
-    private double multiplicador; // multiplicador do ataque do personagem
-    private TipoEfeito tipoEfeito; // tipo do efeito (dano, cura, buff, debuff)
-    private int duracao;          // quantos turnos dura (para buffs/debuffs)
-    private double chanceAcerto;  // chance de acertar (0.0 - 1.0)
-    private double chanceCritico; // chance de crítico
-    private boolean ultimate;     // se é uma habilidade única/ultimate
+    private TipoHabilidade tipo;
+    private int danoBase;
+    private int custoMana;
+    private double chanceAcerto;
+    private boolean critica;
 
-    public Habilidade(String nome, String descricao, int custoMana, int danoBase,
-                      double multiplicador, TipoEfeito tipoEfeito, int duracao,
-                      double chanceAcerto, double chanceCritico, boolean ultimate) {
+    public Habilidade(String nome, TipoHabilidade tipo, int danoBase, int custoMana,
+                      double chanceAcerto, boolean critica) {
         this.nome = nome;
-        this.descricao = descricao;
-        this.custoMana = custoMana;
+        this.tipo = tipo;
         this.danoBase = danoBase;
-        this.multiplicador = multiplicador;
-        this.tipoEfeito = tipoEfeito;
-        this.duracao = duracao;
+        this.custoMana = custoMana;
         this.chanceAcerto = chanceAcerto;
-        this.chanceCritico = chanceCritico;
-        this.ultimate = ultimate;
+        this.critica = critica;
     }
 
-    // --- Métodos de uso ---
-    public int calcularDano(int ataquePersonagem) {
-        int dano = (int) (danoBase + ataquePersonagem * multiplicador);
+    public int calcularDano(int atributoPersonagem) {
+        if (Math.random() > chanceAcerto) return 0; // Errou
 
-        // Crítico
-        if (Math.random() < chanceCritico) {
-            dano *= 2;
+        int dano = danoBase + (atributoPersonagem / 2);
+
+        // Sistema de crítico (20% chance base)
+        if (critica && Math.random() < 0.2) {
+            dano = (int) (dano * 1.5);
         }
+
         return dano;
     }
 
-    public boolean acertou() {
-        return Math.random() < chanceAcerto;
+    // Getters
+    public String getNome() {
+        return nome;
     }
 
-    // Getters
-    public String getNome() { return nome; }
-    public String getDescricao() { return descricao; }
-    public int getCustoMana() { return custoMana; }
-    public TipoEfeito getTipoEfeito() { return tipoEfeito; }
-    public int getDuracao() { return duracao; }
-    public boolean isUltimate() { return ultimate; }
+    public TipoHabilidade getTipo() {
+        return tipo;
+    }
+
+    public int getCustoMana() {
+        return custoMana;
+    }
+
+    public boolean isCritica() {
+        return critica;
+    }
 }

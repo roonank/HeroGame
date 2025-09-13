@@ -1,0 +1,13 @@
+<component name="ArtifactManager">
+  <artifact name="HeroGame:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/HeroGame_jar</output-path>
+    <root id="root">
+      <element id="archive" name="HeroGame.jar">
+        <element id="directory" name="META-INF">
+          <element id="file-copy" path="$PROJECT_DIR$/../../projetos juntos/teste/META-INF/MANIFEST.MF" />
+        </element>
+        <element id="module-output" name="HeroGame" />
+      </element>
+    </root>
+  </artifact>
+</component>

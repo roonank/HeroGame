@@ -1,0 +1,2453 @@
+﻿import Controller.MenuConsole;
+
+public class Main {
+    public static void main(String[] args) {
+        int executarConsoleTela = 1;
+        if(executarConsoleTela == 1){
+            new MenuConsole().iniciar();
+        } else if (executarConsoleTela == 2) {
+            javax.swing.SwingUtilities.invokeLater(() -> {
+                view.MainFrame frame = new view.MainFrame();
+                frame.setVisible(true);
+            });
+        }
+
+
+
+    }
+}
+package Controller;
+
+import model.interfaces.ICombatente;
+import model.interfaces.IHabilidade;
+import model.interfaces.IExperienciavel;
+import model.personagens.Personagem;
+import model.habilidades.Habilidade;
+
+import java.util.Random;
+import java.util.List;
+
+public class Batalha {
+    private ICombatente jogador;
+    private ICombatente inimigo;
+    private Random random;
+    private boolean batalhaFinalizada;
+    private boolean jogadorVenceu;
+    private List<String> logBatalha;
+
+    public enum AcaoBatalha {
+        ATACAR, USAR_HABILIDADE, DEFENDER, FUGIR
+    }
+
+    public Batalha(ICombatente jogador, ICombatente inimigo) {
+        this.jogador = jogador;
+        this.inimigo = inimigo;
+        this.random = new Random();
+        this.batalhaFinalizada = false;
+        this.logBatalha = new java.util.ArrayList<>();
+    }
+
+    public void executarTurno(AcaoBatalha acaoJogador) {
+        if (batalhaFinalizada) return;
+
+        boolean jogadorPrimeiro = determinarOrdemTurnos();
+
+        if (jogadorPrimeiro) {
+            executarAcaoComLog(jogador, inimigo, acaoJogador);
+            if (!inimigo.estaVivo()) {
+                finalizarBatalha(true);
+                return;
+            }
+            executarAcaoComLog(inimigo, jogador, escolherAcaoInimigo());
+        } else {
+            executarAcaoComLog(inimigo, jogador, escolherAcaoInimigo());
+            if (!jogador.estaVivo()) {
+                finalizarBatalha(false);
+                return;
+            }
+            executarAcaoComLog(jogador, inimigo, acaoJogador);
+        }
+
+        if (!jogador.estaVivo()) finalizarBatalha(false);
+        else if (!inimigo.estaVivo()) finalizarBatalha(true);
+    }
+
+    private boolean determinarOrdemTurnos() {
+        // Simula â€œagilidadeâ€: chance 50/50 + bÃ´nus para herÃ³is
+        return random.nextBoolean();
+    }
+
+    private void executarAcaoComLog(ICombatente atacante, ICombatente defensor, AcaoBatalha acao) {
+        switch (acao) {
+            case ATACAR -> {
+                int ataque = atacante.calcularAtaque();
+                int defesa = defensor.calcularDefesa();
+                int dano = Math.max(0, ataque - defesa);
+
+                if (random.nextDouble() < 0.2) {
+                    dano = (int) (dano * 1.5);
+                    logBatalha.add(atacante.getNome() + " desferiu um GOLPE CRÃTICO!");
+                }
+
+                defensor.receberDano(dano);
+                logBatalha.add(atacante.getNome() + " atacou " + defensor.getNome() +
+                        " causando " + dano + " de dano!");
+            }
+            case DEFENDER -> {
+                if (atacante instanceof Personagem p) {
+                    p.defender();
+                    logBatalha.add(atacante.getNome() + " assumiu postura defensiva!");
+                }
+            }
+            case USAR_HABILIDADE -> {
+                if (atacante instanceof IHabilidade h && !h.getHabilidades().isEmpty()) {
+                    Habilidade habilidade = h.getHabilidades().get(random.nextInt(h.getHabilidades().size()));
+                    if (h.podeUsarHabilidade(habilidade)) {
+                        h.usarHabilidade(habilidade, defensor);
+                        logBatalha.add(atacante.getNome() + " usou " + habilidade.getNome() + "!");
+                    } else {
+                        logBatalha.add(atacante.getNome() + " nÃ£o conseguiu usar a habilidade!");
+                        executarAcaoComLog(atacante, defensor, AcaoBatalha.ATACAR);
+                    }
+                } else {
+                    logBatalha.add(atacante.getNome() + " nÃ£o possui habilidades! Atacando normalmente.");
+                    executarAcaoComLog(atacante, defensor, AcaoBatalha.ATACAR);
+                }
+            }
+            case FUGIR -> {
+                int chance = 50;
+                if (random.nextInt(100) < chance) {
+                    batalhaFinalizada = true;
+                    jogadorVenceu = (atacante != jogador);
+                    logBatalha.add(atacante.getNome() + " fugiu da batalha!");
+                } else {
+                    logBatalha.add(atacante.getNome() + " tentou fugir mas falhou!");
+                }
+            }
+        }
+    }
+
+    private AcaoBatalha escolherAcaoInimigo() {
+        return random.nextInt(100) < 70 ? AcaoBatalha.ATACAR : AcaoBatalha.DEFENDER;
+    }
+
+    private void finalizarBatalha(boolean vitoria) {
+        batalhaFinalizada = true;
+        jogadorVenceu = vitoria;
+        if (vitoria) logBatalha.add("VitÃ³ria!");
+        else logBatalha.add("Derrota...");
+    }
+
+    public String getStatusVida() {
+        return jogador.getNome() + ": " + jogador.getVidaAtual() + "/" + jogador.getVidaMaxima() +
+                " | " + inimigo.getNome() + ": " + inimigo.getVidaAtual() + "/" + inimigo.getVidaMaxima();
+    }
+
+    public List<String> getLogBatalha() {
+        return new java.util.ArrayList<>(logBatalha);
+    }
+
+    public boolean isBatalhaFinalizada() { return batalhaFinalizada; }
+    public boolean isJogadorVencedor() { return jogadorVenceu; }
+}
+package Controller;
+
+import model.personagens.*;
+import model.personagens.herois.*;
+import model.personagens.inimigos.deuses.egipcios.*;
+import model.personagens.inimigos.deuses.gregos.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class Jogo {
+    private Heroi jogador;
+    private final List<Inimigo> inimigos;
+    private int andarAtual;
+
+    public Jogo() {
+        inimigos = new ArrayList<>();
+        andarAtual = 0;
+    }
+
+    public void setJogador(Heroi heroi) {
+        this.jogador = heroi;
+    }
+
+    public void escolherHeroi(int opcao) {
+        switch (opcao) {
+            case 1 -> jogador = new Aquiles();
+            case 2 -> jogador = new Hercules();
+            case 3 -> jogador = new Perseu();
+            case 4 -> jogador = new Ragnar();
+            case 5 -> jogador = new Gilgamesh();
+            default -> jogador = new Aquiles();
+        }
+    }
+    //carrega inimigos por mitolgia
+    public void carregarInimigos(int mitologia) {
+        inimigos.clear();
+        if (mitologia == 1) {
+            inimigos.add(new Anubis());
+            inimigos.add(new Horus());
+            inimigos.add(new Isis());
+            inimigos.add(new Osiris());
+            inimigos.add(new Ra());
+        } else if (mitologia == 2) {
+            inimigos.add(new Ares());
+            inimigos.add(new Atena());
+            inimigos.add(new Hades());
+            inimigos.add(new Poseidon());
+            inimigos.add(new Zeus());
+        }
+        andarAtual = 0;
+    }
+
+    public Batalha proximaBatalha() {
+        if (andarAtual >= inimigos.size()) return null;
+        Inimigo inimigo = inimigos.get(andarAtual);
+        andarAtual++;
+        return new Batalha(jogador, inimigo);
+    }
+
+    public Heroi getJogador() {
+        return jogador;
+    }
+
+    public int getAndarAtual() {
+        return andarAtual;
+    }
+
+    public int getTotalAndares() {
+        return inimigos.size();
+    }
+
+    public boolean jogoFinalizado() {
+        return andarAtual >= inimigos.size() || !jogador.estaVivo();
+    }
+}
+package Controller;
+
+import model.personagens.Heroi;
+import model.personagens.herois.*;
+
+import java.util.List;
+import java.util.Scanner;
+
+public class MenuConsole {
+    private final Scanner scanner = new Scanner(System.in);
+
+    public void iniciar() {
+        System.out.println("=== TORRE DOS DEUSES ===");
+
+        // Cria jogo e torre
+        Jogo jogo = new Jogo();
+
+        //Inicia herois
+        List<Heroi> herois = List.of(
+                new Aquiles(),
+                new Hercules(),
+                new Perseu(),
+                new Ragnar(),
+                new Gilgamesh()
+        );
+        // Escolher herÃ³i
+        System.out.println("\nEscolha seu herÃ³i:");
+        for (int i = 0; i < herois.size(); i++) {
+            System.out.println((i + 1) + " - " + herois.get(i).getNome());
+        }
+        int escolha = lerOpcao(1, herois.size());
+        Heroi escolhido = herois.get(escolha - 1);
+        jogo.setJogador(escolhido);
+
+        // Escolher mitologia
+        System.out.println("\nEscolha a mitologia:");
+        System.out.println("1 - EgÃ­pcia");
+        System.out.println("2 - Grega");
+        jogo.carregarInimigos(lerOpcao(1, 2));
+
+        Torre torre = new Torre(jogo);
+
+        // Loop dos andares
+        while (!torre.jogoFinalizado()) {
+            if (!torre.iniciarAndar()) break;
+
+            Batalha batalha = torre.getBatalhaAtual();
+            System.out.println("\n--- Andar " + torre.getAndarAtual() +
+                    " de " + torre.getTotalAndares() + " ---");
+
+            // Loop da batalha
+            while (!batalha.isBatalhaFinalizada()) {
+                System.out.println("\n" + batalha.getStatusVida());
+                System.out.println("Escolha sua aÃ§Ã£o:");
+                System.out.println("1 - Atacar");
+                System.out.println("2 - Usar habilidade");
+                System.out.println("3 - Defender");
+                System.out.println("4 - Fugir");
+
+                int acao = lerOpcao(1, 4);
+                batalha.executarTurno(Batalha.AcaoBatalha.values()[acao - 1]);
+
+                for (String log : batalha.getLogBatalha()) {
+                    System.out.println("  " + log);
+                }
+            }
+
+            if (!batalha.isJogadorVencedor()) {
+                System.out.println("\nVocÃª foi derrotado...");
+                return;
+            }
+
+            System.out.println("\nVitÃ³ria no andar " + torre.getAndarAtual() + "!");
+
+            // ApÃ³s vitÃ³ria, permitir gastar pontos do herÃ³i
+            distribuirPontos(jogo.getJogador());
+        }
+
+        if (jogo.getJogador().estaVivo())
+            System.out.println("\nParabÃ©ns! VocÃª conquistou a Torre dos Deuses!");
+    }
+
+    private void distribuirPontos(model.personagens.Heroi heroi) {
+        if (heroi.getPontosDisponiveis() <= 0) return;
+
+        System.out.println("\nVocÃª tem " + heroi.getPontosDisponiveis() + " pontos para distribuir!");
+        System.out.println("1 - ForÃ§a");
+        System.out.println("2 - Defesa");
+        System.out.println("3 - Vida");
+        System.out.print("Escolha o atributo: ");
+
+        int escolha = lerOpcao(1, 3);
+        System.out.print("Quantos pontos deseja gastar? ");
+        int qtd = Integer.parseInt(scanner.nextLine());
+
+        switch (escolha) {
+            case 1 -> heroi.distribuirPontos("forca", qtd);
+            case 2 -> heroi.distribuirPontos("defesa", qtd);
+            case 3 -> heroi.distribuirPontos("vida", qtd);
+        }
+    }
+
+    private int lerOpcao(int min, int max) {
+        while (true) {
+            String entrada = scanner.nextLine().trim();
+            try {
+                int valor = Integer.parseInt(entrada);
+                if (valor >= min && valor <= max) return valor;
+            } catch (NumberFormatException ignored) {}
+            System.out.print("OpÃ§Ã£o invÃ¡lida, tente novamente: ");
+        }
+    }
+}
+package Controller;
+
+public class Torre {
+    private final Jogo jogo;
+    private Batalha batalhaAtual;
+
+    public Torre(Jogo jogo) {
+        this.jogo = jogo;
+    }
+
+    public boolean iniciarAndar() {
+        batalhaAtual = jogo.proximaBatalha();
+        return batalhaAtual != null;
+    }
+
+    public Batalha getBatalhaAtual() {
+        return batalhaAtual;
+    }
+
+    public boolean jogoFinalizado() {
+        return jogo.jogoFinalizado();
+    }
+
+    public int getAndarAtual() {
+        return jogo.getAndarAtual();
+    }
+
+    public int getTotalAndares() {
+        return jogo.getTotalAndares();
+    }
+
+    public Jogo getJogo() {
+        return jogo;
+    }
+}
+package model.habilidades;
+
+public class Habilidade {
+    private String nome;
+    private TipoHabilidade tipo;
+    private int danoBase;
+    private int custoMana;
+    private double chanceAcerto;
+    private boolean critica;
+
+    public Habilidade(String nome, TipoHabilidade tipo, int danoBase, int custoMana,
+                      double chanceAcerto, boolean critica) {
+        this.nome = nome;
+        this.tipo = tipo;
+        this.danoBase = danoBase;
+        this.custoMana = custoMana;
+        this.chanceAcerto = chanceAcerto;
+        this.critica = critica;
+    }
+
+    public int calcularDano(int atributoPersonagem) {
+        if (Math.random() > chanceAcerto) return 0; // Errou
+
+        int dano = danoBase + (atributoPersonagem / 2);
+
+        // Sistema de crÃ­tico (20% chance base)
+        if (critica && Math.random() < 0.2) {
+            dano = (int) (dano * 1.5);
+        }
+
+        return dano;
+    }
+
+    // Getters
+    public String getNome() {
+        return nome;
+    }
+
+    public TipoHabilidade getTipo() {
+        return tipo;
+    }
+
+    public int getCustoMana() {
+        return custoMana;
+    }
+
+    public boolean isCritica() {
+        return critica;
+    }
+}
+package model.habilidades;
+
+public enum TipoHabilidade {
+    FISICO, MAGICO, CURA, BUFF, DEBUFF
+}
+package model.interfaces;
+
+public interface ICombatente {
+    String getNome();
+    int getVidaAtual();
+    int getVidaMaxima();
+    boolean estaVivo();
+    void receberDano(int dano);
+    int calcularAtaque();
+    int calcularDefesa();
+}
+package model.interfaces;
+
+public interface IExperienciavel {
+    int getNivel();
+    int getExperiencia();
+    void ganharExperiencia(int quantidade);
+    boolean podeSubirNivel();
+    void subirNivel();
+}
+package model.interfaces;
+
+import model.habilidades.Habilidade;
+
+public interface IHabilidade {
+    java.util.List<Habilidade> getHabilidades();
+
+    void adicionarHabilidade(Habilidade habilidade);
+
+    boolean podeUsarHabilidade(Habilidade habilidade);
+
+    void usarHabilidade(Habilidade habilidade, ICombatente alvo);
+}
+package model.personagens;
+
+import model.habilidades.Habilidade;
+import model.habilidades.TipoHabilidade;
+
+import java.util.List;
+
+public class Guerreiro extends Heroi {
+
+    // Construtor com habilidades
+    public Guerreiro(String nome, int vida, int forca, int defesa, List<Habilidade> habilidades) {
+        super(nome, vida, forca, defesa);
+        // Apenas adiciona as habilidades passadas como parÃ¢metro
+        if (habilidades != null) {
+            for (Habilidade habilidade : habilidades) {
+                adicionarHabilidade(habilidade);
+            }
+        }
+    }
+
+    // Construtor sem habilidades
+    public Guerreiro(String nome, int vida, int forca, int defesa) {
+        super(nome, vida, forca, defesa);
+        // NÃ£o adiciona nenhuma habilidade - deixa para as classes filhas
+    }
+
+    // Construtor padrÃ£o para compatibilidade (sem habilidades)
+    public Guerreiro() {
+        super("Guerreiro", 100, 12, 6);
+    }
+
+    @Override
+    public boolean podeUsarHabilidade(Habilidade habilidade) {
+        return habilidade.getTipo() == TipoHabilidade.FISICO;
+    }
+
+    @Override
+    public void usarHabilidade(Habilidade habilidade, model.interfaces.ICombatente alvo) {
+        if (podeUsarHabilidade(habilidade)) {
+            int dano = habilidade.calcularDano(getForca());
+            alvo.receberDano(dano);
+            System.out.println(getNome() + " usa " + habilidade.getNome() +
+                    " e causa " + dano + " de dano!");
+        } else {
+            System.out.println(getNome() + " nÃ£o pode usar esta habilidade!");
+        }
+    }
+
+    //Habilidade Ãºnica do guerreiro
+    public void investidaFuriosa(model.interfaces.ICombatente alvo) {
+        int danoExtra = getForca() + (int) (getForca() * 0.5);
+        alvo.receberDano(danoExtra);
+        System.out.println(getNome() + " executa uma Investida Furiosa causando " +
+                danoExtra + " de dano!");
+    }
+}
+package model.personagens;
+
+import model.habilidades.Habilidade;
+import model.habilidades.TipoHabilidade;
+
+import java.util.List;
+
+public class GuerreiroInimigo extends Inimigo {
+
+    // Construtor com habilidades
+    public GuerreiroInimigo(String nome, int vida, int forca, int defesa, List<Habilidade> habilidades) {
+        super(nome, vida, forca, defesa);
+        // Apenas adiciona as habilidades passadas como parÃ¢metro
+        if (habilidades != null) {
+            for (Habilidade habilidade : habilidades) {
+                adicionarHabilidade(habilidade);
+            }
+        }
+    }
+
+    // Construtor sem habilidades
+    public GuerreiroInimigo(String nome, int vida, int forca, int defesa) {
+        super(nome, vida, forca, defesa);
+        // NÃ£o adiciona nenhuma habilidade - deixa para as classes filhas
+    }
+
+    // Construtor padrÃ£o para compatibilidade (sem habilidades)
+    public GuerreiroInimigo() {
+        super("Guerreiro", 100, 12, 6);
+    }
+
+    @Override
+    public boolean podeUsarHabilidade(Habilidade habilidade) {
+        return habilidade.getTipo() == TipoHabilidade.FISICO;
+    }
+
+    @Override
+    public void usarHabilidade(Habilidade habilidade, model.interfaces.ICombatente alvo) {
+        if (podeUsarHabilidade(habilidade)) {
+            int dano = habilidade.calcularDano(getForca());
+            alvo.receberDano(dano);
+            System.out.println(getNome() + " usa " + habilidade.getNome() +
+                    " e causa " + dano + " de dano!");
+        } else {
+            System.out.println(getNome() + " nÃ£o pode usar esta habilidade!");
+        }
+    }
+
+    //Habilidade Ãºnica do guerreiro
+    public void investidaFuriosa(model.interfaces.ICombatente alvo) {
+        int danoExtra = getForca() + (int) (getForca() * 0.5);
+        alvo.receberDano(danoExtra);
+        System.out.println(getNome() + " executa uma Investida Furiosa causando " +
+                danoExtra + " de dano!");
+    }
+}
+package model.personagens;
+
+import model.interfaces.IExperienciavel;
+
+public abstract class Heroi extends Personagem implements IExperienciavel {
+    protected int nivel;
+    protected int experiencia;
+    protected int experienciaProximoNivel;
+    protected int pontosDisponiveis;
+
+    public Heroi(String nome, int pontosVida, int forca, int defesa) {
+        super(nome, pontosVida, forca, defesa);
+        this.nivel = 1;
+        this.experiencia = 0;
+        this.experienciaProximoNivel = 100;
+        this.pontosDisponiveis = 10;
+    }
+
+    @Override
+    public int getNivel() {
+        return nivel;
+    }
+
+    @Override
+    public int getExperiencia() {
+        return experiencia;
+    }
+
+    @Override
+    public void ganharExperiencia(int quantidade) {
+        experiencia += quantidade;
+        while (podeSubirNivel()) {
+            subirNivel();
+        }
+    }
+
+    @Override
+    public boolean podeSubirNivel() {
+        return experiencia >= experienciaProximoNivel;
+    }
+
+    @Override
+    public void subirNivel() {
+        nivel++;
+        experiencia -= experienciaProximoNivel;
+        experienciaProximoNivel = (int) (experienciaProximoNivel * 1.5);
+        pontosDisponiveis += 3;
+        // Aumento base por nÃ­vel
+        pontosVidaMaximos += 10;
+        pontosVida = pontosVidaMaximos; // Cura completa no nÃ­vel
+    }
+
+    public void distribuirPontos(String atributo, int quantidade) {
+        if (quantidade > pontosDisponiveis || quantidade <= 0) return;
+
+        switch (atributo.toLowerCase()) {
+            case "forca" -> forca += quantidade;
+            case "defesa" -> defesa += quantidade;
+            case "vida" -> {
+                pontosVidaMaximos += quantidade * 5;
+                pontosVida += quantidade * 5;
+            }
+        }
+        pontosDisponiveis -= quantidade;
+    }
+
+    public int getPontosDisponiveis() {
+        return pontosDisponiveis;
+    }
+
+    public void adicionarPontosDisponiveis(int pontos) {
+        pontosDisponiveis += pontos;
+    }
+}
+package model.personagens;
+
+import model.interfaces.IExperienciavel;
+
+public abstract class Inimigo extends Personagem implements IExperienciavel {
+    protected int nivel;
+    protected int experiencia;
+    protected int experienciaProximoNivel;
+    protected int pontosDisponiveis;
+
+    public Inimigo(String nome, int pontosVida, int forca, int defesa) {
+        super(nome, pontosVida, forca, defesa);
+        this.nivel = 1;
+        this.experiencia = 0;
+        this.experienciaProximoNivel = 100;
+        this.pontosDisponiveis = 10;
+    }
+
+    @Override
+    public int getNivel() {
+        return nivel;
+    }
+
+    @Override
+    public int getExperiencia() {
+        return experiencia;
+    }
+
+    @Override
+    public void ganharExperiencia(int quantidade) {
+        experiencia += quantidade;
+        while (podeSubirNivel()) {
+            subirNivel();
+        }
+    }
+
+    @Override
+    public boolean podeSubirNivel() {
+        return experiencia >= experienciaProximoNivel;
+    }
+
+    @Override
+    public void subirNivel() {
+        nivel++;
+        experiencia -= experienciaProximoNivel;
+        experienciaProximoNivel = (int) (experienciaProximoNivel * 1.5);
+        pontosDisponiveis += 3;
+        // Aumento base por nÃ­vel
+        pontosVidaMaximos += 10;
+        pontosVida = pontosVidaMaximos; // Cura completa no nÃ­vel
+    }
+
+    public void distribuirPontos(String atributo, int quantidade) {
+        if (quantidade > pontosDisponiveis || quantidade <= 0) return;
+
+        switch (atributo.toLowerCase()) {
+            case "forca" -> forca += quantidade;
+            case "defesa" -> defesa += quantidade;
+            case "vida" -> {
+                pontosVidaMaximos += quantidade * 5;
+                pontosVida += quantidade * 5;
+            }
+        }
+        pontosDisponiveis -= quantidade;
+    }
+
+    public int getPontosDisponiveis() {
+        return pontosDisponiveis;
+    }
+
+    public void adicionarPontosDisponiveis(int pontos) {
+        pontosDisponiveis += pontos;
+    }
+
+    public void setNivel(int nivel) {
+        this.nivel = nivel;
+    }
+
+    public void setExperiencia(int experiencia) {
+        this.experiencia = experiencia;
+    }
+
+    public int getExperienciaProximoNivel() {
+        return experienciaProximoNivel;
+    }
+
+    public void setExperienciaProximoNivel(int experienciaProximoNivel) {
+        this.experienciaProximoNivel = experienciaProximoNivel;
+    }
+
+    public void setPontosDisponiveis(int pontosDisponiveis) {
+        this.pontosDisponiveis = pontosDisponiveis;
+    }
+}
+package model.personagens;
+
+import model.habilidades.Habilidade;
+import model.habilidades.TipoHabilidade;
+
+import java.util.List;
+
+public class Mago extends Heroi {
+    private int pontosMagia;
+
+    // Construtor com habilidades
+    public Mago(String nome, int vida, int forca, int defesa, int pontosMagia, List<Habilidade> habilidades) {
+        super(nome, vida, forca, defesa);
+        this.pontosMagia = pontosMagia;
+
+
+        // Apenas adiciona as habilidades passadas como parÃ¢metro
+        if (habilidades != null) {
+            for (Habilidade habilidade : habilidades) {
+                adicionarHabilidade(habilidade);
+            }
+        }
+    }
+
+    // Construtor sem habilidades
+    public Mago(String nome, int vida, int forca, int defesa, int pontosMagia) {
+        super(nome, vida, forca, defesa);
+        this.pontosMagia = pontosMagia;
+        // NÃ£o adiciona nenhuma habilidade - deixa para as classes filhas
+    }
+
+    public Mago() {
+        super("Mago", 100, 12, 6);
+    }
+
+    @Override
+    public boolean podeUsarHabilidade(Habilidade habilidade) {
+        return habilidade.getTipo() == TipoHabilidade.MAGICO &&
+                pontosMagia >= habilidade.getCustoMana();
+    }
+
+    @Override
+    public void usarHabilidade(Habilidade habilidade, model.interfaces.ICombatente alvo) {
+        if (podeUsarHabilidade(habilidade)) {
+            pontosMagia -= habilidade.getCustoMana();
+            int dano = habilidade.calcularDano(getForca());
+            alvo.receberDano(dano);
+            System.out.println(getNome() + " usa " + habilidade.getNome() +
+                    " e causa " + dano + " de dano mÃ¡gico!");
+        } else {
+            System.out.println(getNome() + " nÃ£o pode usar esta habilidade!");
+        }
+    }
+
+    // Habilidade Ãºnica do Mago - ExplosÃ£o Arcana
+    public void explosaoArcana(model.interfaces.ICombatente alvo) {
+        if (pontosMagia >= 10) {
+            pontosMagia -= 10;
+            int dano = getForca() * 2 + (int) (Math.random() * 10);
+            alvo.receberDano(dano);
+            System.out.println(getNome() + " libera uma ExplosÃ£o Arcana causando " +
+                    dano + " de dano devastador!");
+        } else {
+            System.out.println(getNome() + " nÃ£o tem magia suficiente para esta habilidade!");
+        }
+    }
+
+    public int getPontosMagia() {
+        return pontosMagia;
+    }
+
+    public void setPontosMagia(int pontosMagia) {
+        this.pontosMagia = pontosMagia;
+    }
+
+}
+package model.personagens;
+
+import model.habilidades.Habilidade;
+import model.habilidades.TipoHabilidade;
+
+import java.util.List;
+
+public class MagoInimigo extends Inimigo {
+    private int pontosMagia;
+
+    // Construtor com habilidades
+    public MagoInimigo(String nome, int vida, int forca, int defesa, int pontosMagia, List<Habilidade> habilidades) {
+        super(nome, vida, forca, defesa);
+        this.pontosMagia = pontosMagia;
+
+
+        // Apenas adiciona as habilidades passadas como parÃ¢metro
+        if (habilidades != null) {
+            for (Habilidade habilidade : habilidades) {
+                adicionarHabilidade(habilidade);
+            }
+        }
+    }
+
+    // Construtor sem habilidades
+    public MagoInimigo(String nome, int vida, int forca, int defesa, int pontosMagia) {
+        super(nome, vida, forca, defesa);
+        this.pontosMagia = pontosMagia;
+        // NÃ£o adiciona nenhuma habilidade - deixa para as classes filhas
+    }
+
+    public MagoInimigo() {
+        super("Mago", 100, 12, 6);
+    }
+
+    @Override
+    public boolean podeUsarHabilidade(Habilidade habilidade) {
+        return habilidade.getTipo() == TipoHabilidade.MAGICO &&
+                pontosMagia >= habilidade.getCustoMana();
+    }
+
+    @Override
+    public void usarHabilidade(Habilidade habilidade, model.interfaces.ICombatente alvo) {
+        if (podeUsarHabilidade(habilidade)) {
+            pontosMagia -= habilidade.getCustoMana();
+            int dano = habilidade.calcularDano(getForca());
+            alvo.receberDano(dano);
+            System.out.println(getNome() + " usa " + habilidade.getNome() +
+                    " e causa " + dano + " de dano mÃ¡gico!");
+        } else {
+            System.out.println(getNome() + " nÃ£o pode usar esta habilidade!");
+        }
+    }
+
+    // Habilidade Ãºnica do Mago - ExplosÃ£o Arcana
+    public void explosaoArcana(model.interfaces.ICombatente alvo) {
+        if (pontosMagia >= 10) {
+            pontosMagia -= 10;
+            int dano = getForca() * 2 + (int) (Math.random() * 10);
+            alvo.receberDano(dano);
+            System.out.println(getNome() + " libera uma ExplosÃ£o Arcana causando " +
+                    dano + " de dano devastador!");
+        } else {
+            System.out.println(getNome() + " nÃ£o tem magia suficiente para esta habilidade!");
+        }
+    }
+
+    public int getPontosMagia() {
+        return pontosMagia;
+    }
+
+    public void setPontosMagia(int pontosMagia) {
+        this.pontosMagia = pontosMagia;
+    }
+
+}
+package model.personagens;
+
+import model.interfaces.ICombatente;
+import model.habilidades.Habilidade;
+import model.interfaces.IHabilidade;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public abstract class Personagem implements ICombatente, IHabilidade {
+    protected String nome;
+    protected int pontosVida;
+    protected int pontosVidaMaximos;
+    protected int forca;
+    protected int defesa;
+    protected List<Habilidade> habilidades;
+    protected boolean defendendo;
+
+    public Personagem(String nome, int pontosVida, int forca, int defesa) {
+        this.nome = nome;
+        this.pontosVida = pontosVida;
+        this.pontosVidaMaximos = pontosVida;
+        this.forca = forca;
+        this.defesa = defesa;
+        this.habilidades = new ArrayList<>();
+        this.defendendo = false;
+    }
+
+    @Override
+    public String getNome() {
+        return nome;
+    }
+
+    @Override
+    public int getVidaAtual() {
+        return pontosVida;
+    }
+
+    @Override
+    public int getVidaMaxima() {
+        return pontosVidaMaximos;
+    }
+
+    @Override
+    public boolean estaVivo() {
+        return pontosVida > 0;
+    }
+
+    @Override
+    public void receberDano(int dano) {
+        int danoFinal = Math.max(0, dano - (defendendo ? defesa * 2 : 0));
+        pontosVida = Math.max(0, pontosVida - danoFinal);
+        defendendo = false; // Reset defesa apÃ³s receber dano
+    }
+
+    @Override
+    public int calcularAtaque() {
+        return forca + (int) (Math.random() * 4); // VariaÃ§Ã£o 0-3
+    }
+
+    @Override
+    public int calcularDefesa() {
+        return defesa + (defendendo ? defesa : 0);
+    }
+
+    @Override
+    public List<Habilidade> getHabilidades() {
+        return new ArrayList<>(habilidades);
+    }
+
+    @Override
+    public void adicionarHabilidade(Habilidade habilidade) {
+        if (habilidade != null) {
+            habilidades.add(habilidade);
+        }
+    }
+
+    public void defender() {
+        this.defendendo = true;
+    }
+
+    public void curar(int quantidade) {
+        pontosVida = Math.min(pontosVidaMaximos, pontosVida + quantidade);
+    }
+
+    // Getters para subclasses
+    protected int getForca() {
+        return forca;
+    }
+
+    protected int getDefesa() {
+        return defesa;
+    }
+
+    protected void setForca(int forca) {
+        this.forca = forca;
+    }
+
+    protected void setDefesa(int defesa) {
+        this.defesa = defesa;
+    }
+}
+package model.personagens.herois;
+
+import model.habilidades.Habilidade;
+import model.habilidades.TipoHabilidade;
+import model.personagens.Guerreiro;
+
+import java.util.Arrays;
+
+public class Aquiles extends Guerreiro {
+
+    public Aquiles() {
+        super("Aquiles", 140, 17, 9,
+                Arrays.asList(
+                        new Habilidade("Golpe do TalÃ£o", TipoHabilidade.FISICO,
+                                34, 2, 0.95, false), // 17 * 2
+                        new Habilidade("Investida Imortal", TipoHabilidade.FISICO,
+                                42, 3, 0.9, false), // 17 * 2.5
+                        new Habilidade("FÃºria do HerÃ³i", TipoHabilidade.FISICO,
+                                51, 4, 0.85, false) // 17 * 3
+                ));
+    }
+
+    @Override
+    public boolean podeUsarHabilidade(Habilidade habilidade) {
+        // Aquiles pode usar qualquer habilidade fÃ­sica
+        return habilidade.getTipo() == TipoHabilidade.FISICO;
+    }
+
+    @Override
+    public void usarHabilidade(Habilidade habilidade, model.interfaces.ICombatente alvo) {
+        if (podeUsarHabilidade(habilidade)) {
+            // Aquiles tem 30% de chance de acerto crÃ­tico
+            int dano = habilidade.calcularDano(getForca());
+            if (Math.random() < 0.3) {
+                dano = (int) (dano * 1.6); // Dano crÃ­tico mais forte
+                System.out.println("GOLPE PERFEITO DE AQUILES!");
+            }
+
+            alvo.receberDano(dano);
+            System.out.println("Aquiles executa " + habilidade.getNome() +
+                    " com precisÃ£o lendÃ¡ria e causa " + dano + " de dano!");
+        } else {
+            System.out.println("Aquiles nÃ£o pode usar esta habilidade!");
+        }
+    }
+
+    // Sobrescreve o metodo do guerreiro com versÃ£o mais Ã¡gil
+    @Override
+    public void investidaFuriosa(model.interfaces.ICombatente alvo) {
+        int danoExtra = getForca() + getDefesa() + 5; // Mais Ã¡gil que um guerreiro comum
+        alvo.receberDano(danoExtra);
+        System.out.println("Aquiles executa uma Investida Imortal causando " +
+                danoExtra + " de dano devastador!");
+    }
+
+    // Habilidade Ãºnica de Aquiles - Velocidade Sobrenatural
+    public void velocidadeSobrenatural(model.interfaces.ICombatente alvo) {
+        System.out.println("Aquiles ativa sua Velocidade Sobrenatural!");
+
+        // Ataques extremamente rÃ¡pidos
+        for (int i = 0; i < 5; i++) {
+            int dano = (getForca() / 3) + (int) (Math.random() * 8);
+            alvo.receberDano(dano);
+            System.out.println("Ataque RelÃ¢mpago " + (i + 1) + ": " + dano + " de dano!");
+
+            // 20% de chance de ataque extra por golpe
+            if (Math.random() < 0.2) {
+                int danoExtra = (int) (dano * 0.5);
+                alvo.receberDano(danoExtra);
+                System.out.println("  â†’ Ataque Extra: " + danoExtra + " de dano!");
+            }
+        }
+    }
+
+    // Metodo especial - FÃºria de Aquiles
+    public void furiaDeAquiles(model.interfaces.ICombatente alvo) {
+        System.out.println("Aquiles entra em FÃºria Imortal!");
+
+        // Aumento temporÃ¡rio de atributos
+        int forcaOriginal = getForca();
+        int defesaOriginal = getDefesa();
+
+        setForca((int) (forcaOriginal * 1.4));
+        setDefesa((int) (defesaOriginal * 0.7)); // Menos defesa, mais ofensiva
+
+        System.out.println("ForÃ§a aumentada para " + getForca() +
+                ", Defesa reduzida para " + getDefesa() + "!");
+        // Em uma implementaÃ§Ã£o completa, precisaria reverter esses valores
+        // apÃ³s alguns turnos ou ao final do combate
+    }
+}
+package model.personagens.herois;
+
+import model.habilidades.Habilidade;
+import model.habilidades.TipoHabilidade;
+import model.personagens.Mago;
+
+import java.util.Arrays;
+
+public class Gilgamesh extends Mago {
+
+    public Gilgamesh() {
+        super("Gilgamesh", 130, 14, 10, 90,
+                Arrays.asList(
+                        new Habilidade("Cetro de Ur", TipoHabilidade.MAGICO,
+                                35, 5, 0.9, false), // 14 * 2.5
+                        new Habilidade("ProjÃ©teis de Argila", TipoHabilidade.MAGICO,
+                                42, 6, 0.85, false), // 14 * 3
+                        new Habilidade("FÃºria da MesopotÃ¢mia", TipoHabilidade.MAGICO,
+                                49, 7, 0.8, false) // 14 * 3.5
+                ));
+    }
+
+    @Override
+    public boolean podeUsarHabilidade(Habilidade habilidade) {
+        // Gilgamesh pode usar habilidades mÃ¡gicas se tiver mana suficiente
+        return habilidade.getTipo() == TipoHabilidade.MAGICO &&
+                getPontosMagia() >= habilidade.getCustoMana();
+    }
+
+    @Override
+    public void usarHabilidade(Habilidade habilidade, model.interfaces.ICombatente alvo) {
+        if (podeUsarHabilidade(habilidade)) {
+            // Gilgamesh tem 25% de chance de crÃ­tico real
+            int dano = habilidade.calcularDano(getForca());
+
+            if (Math.random() < 0.25) {
+                dano = (int) (dano * 1.6);
+                System.out.println("PODER REAL DE GILGAMESH!");
+            }
+
+            setPontosMagia(getPontosMagia() - habilidade.getCustoMana());
+            alvo.receberDano(dano);
+            System.out.println("Gilgamesh conjura " + habilidade.getNome() +
+                    " com autoridade real e causa " + dano + " de dano majestoso!");
+        } else {
+            System.out.println("Gilgamesh nÃ£o pode usar esta habilidade!");
+        }
+    }
+
+    // Sobrescreve o metodo do mago com versÃ£o real
+    @Override
+    public void explosaoArcana(model.interfaces.ICombatente alvo) {
+        if (getPontosMagia() >= 20) {
+            setPontosMagia(getPontosMagia() - 20);
+            int dano = (int) (getForca() * 3.0 + getPontosMagia() * 0.4);
+            alvo.receberDano(dano);
+            System.out.println("Gilgamesh libera uma ExplosÃ£o da realeza causando " +
+                    dano + " de dano imperial!");
+        } else {
+            System.out.println("Gilgamesh nÃ£o tem magia suficiente para esta habilidade!");
+        }
+    }
+
+    // Habilidade Ãºnica de Gilgamesh - ExÃ©rcito de Argila
+    public void exercitoDeArgila(model.interfaces.ICombatente alvo) {
+        System.out.println("Gilgamesh convoca seu ExÃ©rcito de Argila!");
+
+        // MÃºltiplos ataques de criaturas de argila
+        for (int i = 0; i < 4; i++) {
+            int danoBase = getForca() + (int) (Math.random() * 8);
+            int danoMagico = (int) (getPontosMagia() * 0.25);
+            int danoTotal = danoBase + danoMagico;
+
+            alvo.receberDano(danoTotal);
+            System.out.println("Golem de Argila " + (i + 1) + ": " +
+                    danoTotal + " de dano (Base: " + danoBase +
+                    ", MÃ¡gico: " + danoMagico + ")");
+
+            // 15% de chance de ataque extra por golem
+            if (Math.random() < 0.15) {
+                int danoExtra = (int) (danoTotal * 0.3);
+                alvo.receberDano(danoExtra);
+                System.out.println("  â†’ Ataque Extra do Golem: " + danoExtra + " de dano!");
+            }
+        }
+
+        // Consome 25% da mana atual (mais que Ragnar)
+        setPontosMagia((int) (getPontosMagia() * 0.75));
+    }
+
+    // Habilidade defensiva Ãºnica - Muralha da BabilÃ´nia
+    public void muralhaDaBabilonia() {
+        int defesaExtra = getDefesa() * 2 + (int) (getPontosMagia() * 0.3);
+        System.out.println("Gilgamesh ergue a Muralha da BabilÃ´nia, aumentando sua defesa em " +
+                defesaExtra + " pontos!");
+
+        // ImplementaÃ§Ã£o temporÃ¡ria - precisaria de um mecanismo para defesa temporÃ¡ria
+        setDefesa(getDefesa() + defesaExtra);
+    }
+}
+package model.personagens.herois;
+
+import model.habilidades.Habilidade;
+import model.habilidades.TipoHabilidade;
+import model.personagens.Guerreiro;
+
+import java.util.Arrays;
+
+public class Hercules extends Guerreiro {
+
+    public Hercules() {
+        super("HÃ©rcules", 150, 18, 10,
+                Arrays.asList(
+                        new Habilidade("Golpe Poderoso", TipoHabilidade.FISICO,
+                                36, 2, 0.9, false), // 18 * 2
+                        new Habilidade("ForÃ§a de TitÃ£", TipoHabilidade.FISICO,
+                                45, 3, 0.85, false), // 18 * 2.5
+                        new Habilidade("Punhos dos Deuses", TipoHabilidade.FISICO,
+                                54, 4, 0.75, false) // 18 * 3
+                ));
+    }
+
+    @Override
+    public boolean podeUsarHabilidade(Habilidade habilidade) {
+        // HÃ©rcules pode usar qualquer habilidade fÃ­sica
+        return habilidade.getTipo() == TipoHabilidade.FISICO;
+    }
+
+    @Override
+    public void usarHabilidade(Habilidade habilidade, model.interfaces.ICombatente alvo) {
+        if (podeUsarHabilidade(habilidade)) {
+            // HÃ©rcules tem 20% de chance de dano crÃ­tico
+            int dano = habilidade.calcularDano(getForca());
+            if (Math.random() < 0.2) {
+                dano = (int) (dano * 1.5);
+                System.out.println("DANO CRÃTICO!");
+            }
+
+            alvo.receberDano(dano);
+            System.out.println("HÃ©rcules usa " + habilidade.getNome() +
+                    " com poder divino e causa " + dano + " de dano!");
+        } else {
+            System.out.println("HÃ©rcules nÃ£o pode usar esta habilidade!");
+        }
+    }
+
+    // Sobrescreve o mÃ©todo do guerreiro com versÃ£o mais poderosa
+    @Override
+    public void investidaFuriosa(model.interfaces.ICombatente alvo) {
+        int danoExtra = (int) (getForca() * 2.0); // Mais poderoso que um guerreiro comum
+        alvo.receberDano(danoExtra);
+        System.out.println("HÃ©rcules executa uma Investida Divina causando " +
+                danoExtra + " de dano devastador!");
+    }
+
+    // Habilidade Ãºnica de HÃ©rcules
+    public void furiaDivina(model.interfaces.ICombatente alvo) {
+        System.out.println("HÃ©rcules entra em FÃºria Divina!");
+
+        // MÃºltiplos ataques
+        for (int i = 0; i < 3; i++) {
+            int dano = getForca() + (int) (Math.random() * getForca());
+            alvo.receberDano(dano);
+            System.out.println("Ataque " + (i + 1) + ": " + dano + " de dano!");
+        }
+    }
+
+    // Metodo especial para recuperar vida
+    public void regeneracaoDivina() {
+        int cura = getVidaMaxima() / 4;
+        curar(cura);
+        System.out.println("HÃ©rcules usa sua heranÃ§a divina para recuperar " +
+                cura + " pontos de vida!");
+    }
+}
+package model.personagens.herois;
+
+import model.habilidades.Habilidade;
+import model.habilidades.TipoHabilidade;
+import model.personagens.Guerreiro;
+
+import java.util.Arrays;
+
+public class Perseu extends Guerreiro {
+
+    public Perseu() {
+        super("Perseu", 130, 16, 12,
+                Arrays.asList(
+                        new Habilidade("Corte da Harpe", TipoHabilidade.FISICO,
+                                32, 2, 0.95, false), // 16 * 2
+                        new Habilidade("Golpe da Medusa", TipoHabilidade.FISICO,
+                                40, 3, 0.9, false), // 16 * 2.5
+                        new Habilidade("FÃºria do HerÃ³i", TipoHabilidade.FISICO,
+                                48, 4, 0.8, false) // 16 * 3
+                ));
+    }
+
+    @Override
+    public boolean podeUsarHabilidade(Habilidade habilidade) {
+        // Perseu pode usar qualquer habilidade fÃ­sica
+        return habilidade.getTipo() == TipoHabilidade.FISICO;
+    }
+
+    @Override
+    public void usarHabilidade(Habilidade habilidade, model.interfaces.ICombatente alvo) {
+        if (podeUsarHabilidade(habilidade)) {
+            // Perseu tem 25% de chance de esquiva e contra-ataque
+            int dano = habilidade.calcularDano(getForca());
+
+            // Chance de esquiva Ã¡gil
+            if (Math.random() < 0.25) {
+                System.out.println("Perseu esquiva com agilidade e contra-ataca!");
+                dano = (int) (dano * 1.3);
+            }
+
+            alvo.receberDano(dano);
+            System.out.println("Perseu usa " + habilidade.getNome() +
+                    " com precisÃ£o heroica e causa " + dano + " de dano!");
+        } else {
+            System.out.println("Perseu nÃ£o pode usar esta habilidade!");
+        }
+    }
+
+    // Sobrescreve o mÃ©todo do guerreiro com versÃ£o mais Ã¡gil
+    @Override
+    public void investidaFuriosa(model.interfaces.ICombatente alvo) {
+        int danoBase = getForca() + getDefesa(); // Usa forÃ§a + defesa para representar agilidade
+        alvo.receberDano(danoBase);
+        System.out.println("Perseu executa uma Investida Ãgil causando " +
+                danoBase + " de dano preciso!");
+    }
+
+    // Habilidade Ãºnica de Perseu - Reflexos Sobrenaturais
+    public void reflexosSobrenaturais(model.interfaces.ICombatente alvo) {
+        System.out.println("Perseu ativa seus Reflexos Sobrenaturais!");
+
+        // Ataques rÃ¡pidos e precisos baseados na forÃ§a e defesa
+        for (int i = 0; i < 4; i++) {
+            int dano = (getForca() / 2) + (int) (Math.random() * getDefesa());
+            alvo.receberDano(dano);
+            System.out.println("Ataque RÃ¡pido " + (i + 1) + ": " + dano + " de dano preciso!");
+        }
+    }
+
+    // Metodo especial para usar o Escudo de Atena
+    public void escudoDeAtena() {
+        int defesaExtra = getDefesa() * 2;
+        // ImplementaÃ§Ã£o temporÃ¡ria - aumenta a defesa temporariamente
+        int defesaOriginal = getDefesa();
+        setDefesa(defesaOriginal + defesaExtra);
+        System.out.println("Perseu usa o Escudo de Atena, aumentando sua defesa em " +
+                defesaExtra + " pontos! Defesa atual: " + getDefesa());
+
+        // Em uma implementaÃ§Ã£o completa, precisaria de um mecanismo para
+        // reverter este aumento apÃ³s alguns turnos
+    }
+}
+package model.personagens.herois;
+
+import model.habilidades.Habilidade;
+import model.habilidades.TipoHabilidade;
+import model.personagens.Mago;
+
+import java.util.Arrays;
+
+public class Ragnar extends Mago {
+
+    public Ragnar() {
+        super("Ragnar", 120, 12, 8, 80, // Mais vida, forÃ§a e defesa que um mago comum
+                Arrays.asList(
+                        new Habilidade("Grito do Viking", TipoHabilidade.MAGICO,
+                                30, 4, 0.9, false), // 12 * 2.5
+                        new Habilidade("Machado de Gelo", TipoHabilidade.MAGICO,
+                                36, 5, 0.85, false), // 12 * 3
+                        new Habilidade("FÃºria NÃ³rdica", TipoHabilidade.MAGICO,
+                                42, 6, 0.8, false) // 12 * 3.5
+                ));
+    }
+
+    @Override
+    public boolean podeUsarHabilidade(Habilidade habilidade) {
+        // Ragnar pode usar habilidades mÃ¡gicas se tiver mana suficiente
+        return habilidade.getTipo() == TipoHabilidade.MAGICO &&
+                getPontosMagia() >= habilidade.getCustoMana();
+    }
+
+    @Override
+    public void usarHabilidade(Habilidade habilidade, model.interfaces.ICombatente alvo) {
+        if (podeUsarHabilidade(habilidade)) {
+            // Ragnar tem 20% de chance de crÃ­tico mÃ¡gico
+            int dano = habilidade.calcularDano(getForca());
+
+            if (Math.random() < 0.2) {
+                dano = (int) (dano * 1.5);
+                System.out.println("CRÃTICO MÃGICO!");
+            }
+
+            setPontosMagia(getPontosMagia() - habilidade.getCustoMana());
+            alvo.receberDano(dano);
+            System.out.println("Ragnar invoca " + habilidade.getNome() +
+                    " com poder nÃ³rdico e causa " + dano + " de dano mÃ¡gico!");
+        } else {
+            System.out.println("Ragnar nÃ£o pode usar esta habilidade!");
+        }
+    }
+
+    // Sobrescreve o metodo do mago com versÃ£o mais poderosa
+    @Override
+    public void explosaoArcana(model.interfaces.ICombatente alvo) {
+        if (getPontosMagia() >= 15) {
+            setPontosMagia(getPontosMagia() - 15);
+            int dano = (int) (getForca() * 2.5 + getPontosMagia() * 0.5);
+            alvo.receberDano(dano);
+            System.out.println("Ragnar libera uma ExplosÃ£o Arcana NÃ³rdica causando " +
+                    dano + " de dano devastador!");
+        } else {
+            System.out.println("Ragnar nÃ£o tem magia suficiente para esta habilidade!");
+        }
+    }
+
+    // Habilidade Ãºnica de Ragnar - Berserker MÃ­stico
+    public void berserkerMistico(model.interfaces.ICombatente alvo) {
+        System.out.println("Ragnar entra em estado de Berserker MÃ­stico!");
+
+        // Combina dano fÃ­sico e mÃ¡gico em mÃºltiplos ataques
+        for (int i = 0; i < 3; i++) {
+            int danoFisico = getForca() + (int) (Math.random() * getForca());
+            int danoMagico = (int) (getPontosMagia() * 0.3);
+            int danoTotal = danoFisico + danoMagico;
+
+            alvo.receberDano(danoTotal);
+            System.out.println("Ataque Berserker " + (i + 1) + ": " +
+                    danoTotal + " de dano (FÃ­sico: " + danoFisico +
+                    ", MÃ¡gico: " + danoMagico + ")");
+        }
+
+        // Consome 20% da mana atual
+        setPontosMagia((int) (getPontosMagia() * 0.8));
+    }
+
+    // Metodo especial para regeneraÃ§Ã£o nÃ³rdica
+    public void regeneracaoNordica() {
+        int cura = getVidaMaxima() / 4;
+        int manaRecuperada = (int) (getPontosMagia() * 0.4);
+
+        curar(cura);
+        setPontosMagia(getPontosMagia() + manaRecuperada);
+
+        System.out.println("Ragnar invoca a regeneraÃ§Ã£o nÃ³rdica, recuperando " +
+                cura + " de vida e " + manaRecuperada + " de magia!");
+    }
+}
+package model.personagens.inimigos.deuses.egipcios;
+
+import model.habilidades.Habilidade;
+import model.habilidades.TipoHabilidade;
+import model.personagens.Guerreiro;
+import model.interfaces.ICombatente;
+import model.personagens.GuerreiroInimigo;
+
+import java.util.Arrays;
+
+public class Anubis extends GuerreiroInimigo {
+
+    public Anubis() {
+        super("Anubis", 160, 16, 12,
+                Arrays.asList(
+                        new Habilidade("LÃ¢mina das Sombras", TipoHabilidade.FISICO,
+                                32, 2, 0.9, false), // 16 * 2
+                        new Habilidade("Toque da Morte", TipoHabilidade.FISICO,
+                                40, 3, 0.85, false), // 16 * 2.5
+                        new Habilidade("Punho do Submundo", TipoHabilidade.FISICO,
+                                48, 4, 0.75, false) // 16 * 3
+                ));
+    }
+
+    @Override
+    public boolean podeUsarHabilidade(Habilidade habilidade) {
+        // Anubis pode usar qualquer habilidade fÃ­sica
+        return habilidade.getTipo() == TipoHabilidade.FISICO;
+    }
+
+    @Override
+    public void usarHabilidade(Habilidade habilidade, ICombatente alvo) {
+        if (podeUsarHabilidade(habilidade)) {
+            //tem 20% de chance de dano crÃ­tico
+            int dano = habilidade.calcularDano(getForca());
+            if (Math.random() < 0.2) {
+                dano = (int) (dano * 1.5);
+                System.out.println("DANO CRÃTICO!");
+            }
+
+            alvo.receberDano(dano);
+            System.out.println("Anubis usa " + habilidade.getNome() +
+                    " com poder divino e causa " + dano + " de dano!");
+        } else {
+            System.out.println("Anubis nÃ£o pode usar esta habilidade!");
+        }
+    }
+
+    // Sobrescreve o metodo do guerreiro com versÃ£o sombria
+    @Override
+    public void investidaFuriosa(ICombatente alvo) {
+        int danoExtra = (int) (getForca() * 2.2); // Mais poderoso que um guerreiro comum
+        alvo.receberDano(danoExtra);
+        System.out.println("Anubis executa uma Investida das Trevas causando " +
+                danoExtra + " de dano e enfraquecendo o alvo!");
+
+        // LÃ³gica para aplicar enfraquecimento seria implementada aqui
+    }
+
+    // Habilidade Ãºnica de Hades - Invoca espÃ­ritos do submundo
+    public void invocacaoEspiritual(ICombatente alvo) {
+        System.out.println("Anubis invoca espÃ­ritos do Submundo!");
+
+        // Ataques mÃºltiplos com chance de ignorar defesa
+        for (int i = 0; i < 2; i++) {
+            int danoBase = getForca() + (int) (Math.random() * getForca() / 2);
+
+            // 40% de chance de ignorar defesa
+            if (Math.random() < 0.4) {
+                danoBase = (int) (danoBase * 1.2); // Dano aumentado quando ignora defesa
+                System.out.println("O espÃ­rito atravessa as defesas!");
+            }
+
+            alvo.receberDano(danoBase);
+            System.out.println("EspÃ­rito " + (i + 1) + ": " + danoBase + " de dano!");
+        }
+    }
+
+    // Habilidade Ãºnica para manipular as sombras
+    public void mantoDasSombras(model.interfaces.ICombatente alvo) {
+        System.out.println("Anubis se envolve em um manto de sombras!");
+
+        // MÃºltiplos ataques
+        for (int i = 0; i < 3; i++) {
+            int dano = getForca() + (int) (Math.random() * getForca());
+            alvo.receberDano(dano);
+            System.out.println("Ataque " + (i + 1) + ": " + dano + " de dano!");
+        }
+    }
+
+    // Metodo especial para recuperar vida
+    public void olharAmedrontador() {
+        int cura = getVidaMaxima() / 4;
+        curar(cura);
+        System.out.println("Anubis usa sua heranÃ§a divina para recuperar " +
+                cura + " pontos de vida!");
+    }
+}
+package model.personagens.inimigos.deuses.egipcios;
+
+import model.habilidades.Habilidade;
+import model.habilidades.TipoHabilidade;
+import model.personagens.GuerreiroInimigo;
+
+import java.util.Arrays;
+
+public class Horus extends GuerreiroInimigo {
+
+    public Horus() {
+        super("Horus", 140, 20, 8,
+                Arrays.asList(
+                        new Habilidade("LanÃ§a da DiscÃ³rdia", TipoHabilidade.FISICO,
+                                40, 2, 0.85, false), // 20 * 2
+                        new Habilidade("Golpe da Guerra", TipoHabilidade.FISICO,
+                                50, 3, 0.8, false), // 20 * 2.5
+                        new Habilidade("FÃºria Belicosa", TipoHabilidade.FISICO,
+                                60, 4, 0.7, false) // 20 * 3
+                ));
+    }
+
+    @Override
+    public boolean podeUsarHabilidade(Habilidade habilidade) {
+        // Horus pode usar qualquer habilidade fÃ­sica
+        return habilidade.getTipo() == TipoHabilidade.FISICO;
+    }
+
+    @Override
+    public void usarHabilidade(Habilidade habilidade, model.interfaces.ICombatente alvo) {
+        if (podeUsarHabilidade(habilidade)) {
+            // Horus tem 25% de chance de dano crÃ­tico
+            int dano = habilidade.calcularDano(getForca());
+            if (Math.random() < 0.25) {
+                dano = (int) (dano * 1.8); // Multiplicador maior
+                System.out.println("FÃšRIA GUERREIRA! DANO CRÃTICO!");
+            }
+
+            alvo.receberDano(dano);
+            System.out.println("Horus usa " + habilidade.getNome() +
+                    " com sede de batalha e causa " + dano + " de dano!");
+        } else {
+            System.out.println("Horus nÃ£o pode usar esta habilidade!");
+        }
+    }
+
+    // Sobrescreve o metodo do guerreiro com versÃ£o mais agressiva
+    @Override
+    public void investidaFuriosa(model.interfaces.ICombatente alvo) {
+        int danoExtra = (int) (getForca() * 2.5);
+        alvo.receberDano(danoExtra);
+        System.out.println("Horus executa uma Investida Sangrenta causando " +
+                danoExtra + " de dano devastador!");
+
+        // Horus ganha um bÃ´nus de forÃ§a apÃ³s a investida
+        setForca(getForca() + 2);
+        System.out.println("Horus fica mais furioso! ForÃ§a aumentada!");
+    }
+
+    // Metodo especial para SeduÃ§Ã£o da Guerra
+    public void seducaoDaGuerra() {
+        System.out.println("Horus seduz com o chamado da guerra!");
+
+        // Aumenta drasticamente o dano mas reduz a defesa
+        setForca(getForca() + 5);
+        setDefesa(getDefesa() - 3);
+
+        System.out.println("ForÃ§a aumentada em 5, defesa reduzida em 3!");
+    }
+
+    // Habilidade de guerra - EstratÃ©gia Militar
+    public void estrategiaMilitar(model.interfaces.ICombatente alvo) {
+        System.out.println("Horus implementa sua EstratÃ©gia Militar!");
+
+        // Dano baseado na defesa do inimigo (quanto mais defesa, mais dano)
+        int danoEstrategico = (int) (getForca() * 1.5 + getDefesa() * 0.8);
+        alvo.receberDano(danoEstrategico);
+
+        System.out.println("Dano estratÃ©gico: " + danoEstrategico +
+                " | Horus explora as fraquezas tÃ¡ticas do inimigo!");
+    }
+}
+package model.personagens.inimigos.deuses.egipcios;
+
+import model.habilidades.Habilidade;
+import model.habilidades.TipoHabilidade;
+import model.personagens.MagoInimigo;
+
+import java.util.Arrays;
+
+public class Isis extends MagoInimigo {
+
+    public Isis() {
+        super("Isis", 110, 10, 7, 100, // Menos vida e defesa, mas mais mana que Ragnar
+                Arrays.asList(
+                        new Habilidade("Sabedoria Divina", TipoHabilidade.MAGICO,
+                                25, 3, 0.95, false), // 10 * 2.5
+                        new Habilidade("LanÃ§a da VitÃ³ria", TipoHabilidade.MAGICO,
+                                30, 4, 0.9, false), // 10 * 3
+                        new Habilidade("Escudo de Ã‰gide", TipoHabilidade.MAGICO,
+                                35, 5, 0.85, false) // 10 * 3.5
+                ));
+    }
+
+    @Override
+    public boolean podeUsarHabilidade(Habilidade habilidade) {
+        // Isis pode usar habilidades mÃ¡gicas se tiver mana suficiente
+        return habilidade.getTipo() == TipoHabilidade.MAGICO &&
+                getPontosMagia() >= habilidade.getCustoMana();
+    }
+
+    @Override
+    public void usarHabilidade(Habilidade habilidade, model.interfaces.ICombatente alvo) {
+        if (podeUsarHabilidade(habilidade)) {
+            // Isis tem 25% de chance de crÃ­tico mÃ¡gico (mais que Ragnar)
+            int dano = habilidade.calcularDano(getForca());
+
+            if (Math.random() < 0.25) {
+                dano = (int) (dano * 1.6);
+                System.out.println("CRÃTICO DIVINO!");
+            }
+
+            setPontosMagia(getPontosMagia() - habilidade.getCustoMana());
+            alvo.receberDano(dano);
+            System.out.println("Isis invoca " + habilidade.getNome() +
+                    " com poder divino e causa " + dano + " de dano mÃ¡gico!");
+        } else {
+            System.out.println("Isis nÃ£o pode usar esta habilidade!");
+        }
+    }
+
+    // Sobrescreve o metodo do mago com versÃ£o divina
+    @Override
+    public void explosaoArcana(model.interfaces.ICombatente alvo) {
+        if (getPontosMagia() >= 12) {
+            setPontosMagia(getPontosMagia() - 12);
+            int dano = (int) (getForca() * 2.2 + getPontosMagia() * 0.6);
+            alvo.receberDano(dano);
+            System.out.println("Isis libera uma ExplosÃ£o Arcana Divina causando " +
+                    dano + " de dano celestial!");
+        } else {
+            System.out.println("Isis nÃ£o tem magia suficiente para esta habilidade!");
+        }
+    }
+
+    // Habilidade Ãºnica de Isis - Sabedoria EstratÃ©gica
+    public void sabedoriaEstrategica(model.interfaces.ICombatente alvo) {
+        System.out.println("Isis utiliza sua Sabedoria EstratÃ©gica!");
+
+        // Analisa o alvo e aplica dano baseado na defesa do inimigo
+        int danoBase = getForca() * 2;
+        int danoBonus = (int) (getDefesa() * 0.5); // Dano extra baseado na defesa do alvo
+        int danoTotal = danoBase + danoBonus;
+
+        alvo.receberDano(danoTotal);
+        System.out.println("Isis encontra a fraqueza do inimigo causando " +
+                danoTotal + " de dano estratÃ©gico! (Bonus por defesa: " + danoBonus + ")");
+
+        // Recupera 10% da mana gasta no prÃ³ximo turno
+        setPontosMagia(getPontosMagia() + (int) (danoTotal * 0.1));
+    }
+
+    // Metodo especial para ProteÃ§Ã£o Divina
+    public void protecaoDivina() {
+        int escudo = (int) (getVidaMaxima() * 0.3);
+        int regeneracaoMana = (int) (getPontosMagia() * 0.25);
+
+        // Cria um escudo protetor
+        System.out.println("Isis invoca uma ProteÃ§Ã£o Divina, criando um escudo de " +
+                escudo + " pontos e recuperando " + regeneracaoMana + " de magia!");
+
+        // ImplementaÃ§Ã£o do escudo dependeria da lÃ³gica do jogo
+        curar(escudo); // Simula o escudo como cura temporÃ¡ria
+        setPontosMagia(getPontosMagia() + regeneracaoMana);
+    }
+}
+package model.personagens.inimigos.deuses.egipcios;
+
+import model.habilidades.Habilidade;
+import model.habilidades.TipoHabilidade;
+import model.personagens.MagoInimigo;
+
+import java.util.Arrays;
+
+public class Osiris extends MagoInimigo {
+
+    public Osiris() {
+        super("Osiris", 130, 12, 8, 90, // Mais vida e forÃ§a que Atena, menos mana
+                Arrays.asList(
+                        new Habilidade("Tridente dos Mares", TipoHabilidade.MAGICO,
+                                30, 4, 0.9, false), // 12 * 2.5
+                        new Habilidade("Tsunami Devastador", TipoHabilidade.MAGICO,
+                                36, 5, 0.85, false), // 12 * 3
+                        new Habilidade("FÃºria dos Oceanos", TipoHabilidade.MAGICO,
+                                42, 6, 0.8, false) // 12 * 3.5
+                ));
+    }
+
+    @Override
+    public boolean podeUsarHabilidade(Habilidade habilidade) {
+        // Osiris pode usar habilidades mÃ¡gicas se tiver mana suficiente
+        return habilidade.getTipo() == TipoHabilidade.MAGICO &&
+                getPontosMagia() >= habilidade.getCustoMana();
+    }
+
+    @Override
+    public void usarHabilidade(Habilidade habilidade, model.interfaces.ICombatente alvo) {
+        if (podeUsarHabilidade(habilidade)) {
+            // Osiris tem 20% de chance de crÃ­tico mÃ¡gico com stun
+            int dano = habilidade.calcularDano(getForca());
+
+            if (Math.random() < 0.2) {
+                dano = (int) (dano * 1.7);
+                System.out.println("CRÃTICO MARINHO! O inimigo foi atordoado pelas ondas!");
+                // Aqui seria implementado o efeito de stun se o sistema permitisse
+            }
+
+            setPontosMagia(getPontosMagia() - habilidade.getCustoMana());
+            alvo.receberDano(dano);
+            System.out.println("Osiris invoca " + habilidade.getNome() +
+                    " com poder dos mares e causa " + dano + " de dano aquÃ¡tico!");
+        } else {
+            System.out.println("Osiris nÃ£o pode usar esta habilidade!");
+        }
+    }
+
+    // Sobrescreve o metodo do mago com versÃ£o marinha
+    @Override
+    public void explosaoArcana(model.interfaces.ICombatente alvo) {
+        if (getPontosMagia() >= 15) {
+            setPontosMagia(getPontosMagia() - 15);
+            int dano = (int) (getForca() * 2.8 + getPontosMagia() * 0.4);
+            alvo.receberDano(dano);
+            System.out.println("Osiris libera uma ExplosÃ£o Arcana Marinha causando " +
+                    dano + " de dano devastador das profundezas!");
+        } else {
+            System.out.println("Osiris nÃ£o tem magia suficiente para esta habilidade!");
+        }
+    }
+
+    // Habilidade Ãºnica de Osiris - FÃºria dos Mares
+    public void furiaDosMares(model.interfaces.ICombatente alvo) {
+        System.out.println("Osiris desencadeia a FÃºria dos Mares!");
+
+        // Ataque em Ã¡rea que causa dano mÃºltiplo baseado na forÃ§a e mana
+        for (int i = 0; i < 2; i++) {
+            int danoBase = getForca() * 2;
+            int danoMarinho = (int) (getPontosMagia() * 0.4);
+            int danoTotal = danoBase + danoMarinho;
+
+            alvo.receberDano(danoTotal);
+            System.out.println("Onda " + (i + 1) + ": " + danoTotal +
+                    " de dano aquÃ¡tico! (Base: " + danoBase + ", Marinho: " + danoMarinho + ")");
+        }
+
+        // Reduz a defesa do alvo apÃ³s o ataque
+        System.out.println("A fÃºria dos mares enfraquece a defesa do inimigo!");
+    }
+
+    // Metodo especial para MarÃ© Alta
+    public void mareAlta() {
+        int curaMarinha = (int) (getVidaMaxima() * 0.25);
+        int manaDasProfundezas = (int) (getPontosMagia() * 0.3);
+
+        System.out.println("Osiris invoca a MarÃ© Alta, recuperando " +
+                curaMarinha + " de vida e " + manaDasProfundezas + " de magia das profundezas!");
+
+        curar(curaMarinha);
+        setPontosMagia(getPontosMagia() + manaDasProfundezas);
+    }
+
+}
+package model.personagens.inimigos.deuses.egipcios;
+
+import model.habilidades.Habilidade;
+import model.habilidades.TipoHabilidade;
+import model.interfaces.ICombatente;
+import model.personagens.MagoInimigo;
+
+import java.util.Arrays;
+
+public class Ra extends MagoInimigo {
+
+    public Ra() {
+        super("Ra", 120, 10, 8, 100,
+                Arrays.asList(
+                        new Habilidade("Sabedoria Suprema", TipoHabilidade.MAGICO,
+                                25, 3, 0.95, false),
+                        new Habilidade("Chama Destruidora", TipoHabilidade.MAGICO,
+                                40, 4, 0.99, false),
+                        new Habilidade("DesolaÃ§Ã£o Divina", TipoHabilidade.MAGICO,
+                                35, 5, 0.85, false)
+                ));
+    }
+
+    @Override
+    public boolean podeUsarHabilidade(Habilidade habilidade) {
+        // Ra pode usar habilidades mÃ¡gicas se tiver mana suficiente
+        return habilidade.getTipo() == TipoHabilidade.MAGICO &&
+                getPontosMagia() >= habilidade.getCustoMana();
+    }
+
+    @Override
+    public void usarHabilidade(Habilidade habilidade, model.interfaces.ICombatente alvo) {
+        if (podeUsarHabilidade(habilidade)) {
+            // Ra tem 25% de chance de crÃ­tico mÃ¡gico (mais que Ragnar)
+            int dano = habilidade.calcularDano(getForca());
+
+            if (Math.random() < 0.25) {
+                dano = (int) (dano * 1.6);
+                System.out.println("CRÃTICO DIVINO!");
+            }
+
+            setPontosMagia(getPontosMagia() - habilidade.getCustoMana());
+            alvo.receberDano(dano);
+            System.out.println("Ra invoca " + habilidade.getNome() +
+                    " com poder divino e causa " + dano + " de dano mÃ¡gico!");
+        } else {
+            System.out.println("Ra nÃ£o pode usar esta habilidade!");
+        }
+    }
+
+    // Sobrescreve o metodo do mago com versÃ£o divina
+    @Override
+    public void explosaoArcana(ICombatente alvo) {
+        if (getPontosMagia() >= 12) {
+            setPontosMagia(getPontosMagia() - 12);
+            int dano = (int) (getForca() * 2.3 + getPontosMagia() * 0.8);
+            alvo.receberDano(dano);
+            System.out.println("Ra libera uma ExplosÃ£o Arcana Divina causando " +
+                    dano + " de dano celestial!");
+        } else {
+            System.out.println("Ra nÃ£o tem magia suficiente para esta habilidade!");
+        }
+    }
+
+    // Habilidade Ãºnica de Ra - Sabedoria EstratÃ©gica
+    public void saberSupremo(ICombatente alvo) {
+        System.out.println("Ra utiliza seu saber supremo!");
+
+        // Analisa o alvo e aplica dano baseado na defesa do inimigo
+        int danoBase = getForca() * 2;
+        int danoBonus = (int) (getDefesa() * 0.6); // Dano extra baseado na defesa do alvo
+        int danoTotal = danoBase + danoBonus;
+
+        alvo.receberDano(danoTotal);
+        System.out.println("Ra encontra a fraqueza do inimigo causando " +
+                danoTotal + " de dano estratÃ©gico! (Bonus por defesa: " + danoBonus + ")");
+
+        // Recupera 10% da mana gasta no prÃ³ximo turno
+        setPontosMagia(getPontosMagia() + (int) (danoTotal * 0.2));
+    }
+
+    // Metodo especial
+    public void ataqueCelestial() {
+        int escudo = (int) (getVidaMaxima() * 0.3);
+        int regeneracaoMana = (int) (getPontosMagia() * 0.25);
+
+        System.out.println("Ra invoca o ataque celestial, criando um escudo de " +
+                escudo + " pontos e recuperando " + regeneracaoMana + " de magia!");
+
+        // ImplementaÃ§Ã£o do escudo dependeria da lÃ³gica do jogo
+        curar(escudo); // Simula o escudo como cura
+        setPontosMagia(getPontosMagia() + regeneracaoMana);
+    }
+}
+package model.personagens.inimigos.deuses.gregos;
+
+import model.habilidades.Habilidade;
+import model.habilidades.TipoHabilidade;
+import model.personagens.GuerreiroInimigo;
+
+import java.util.Arrays;
+
+public class Ares extends GuerreiroInimigo {
+
+    public Ares() {
+        super("Ares", 140, 20, 8,
+                Arrays.asList(
+                        new Habilidade("LanÃ§a da DiscÃ³rdia", TipoHabilidade.FISICO,
+                                40, 2, 0.85, false), // 20 * 2
+                        new Habilidade("Golpe da Guerra", TipoHabilidade.FISICO,
+                                50, 3, 0.8, false), // 20 * 2.5
+                        new Habilidade("FÃºria Belicosa", TipoHabilidade.FISICO,
+                                60, 4, 0.7, false) // 20 * 3
+                ));
+    }
+
+    @Override
+    public boolean podeUsarHabilidade(Habilidade habilidade) {
+        // Ares pode usar qualquer habilidade fÃ­sica
+        return habilidade.getTipo() == TipoHabilidade.FISICO;
+    }
+
+    @Override
+    public void usarHabilidade(Habilidade habilidade, model.interfaces.ICombatente alvo) {
+        if (podeUsarHabilidade(habilidade)) {
+            // Ares tem 25% de chance de dano crÃ­tico
+            int dano = habilidade.calcularDano(getForca());
+            if (Math.random() < 0.25) {
+                dano = (int) (dano * 1.8); // Multiplicador maior
+                System.out.println("FÃšRIA GUERREIRA! DANO CRÃTICO!");
+            }
+
+            alvo.receberDano(dano);
+            System.out.println("Ares usa " + habilidade.getNome() +
+                    " com sede de batalha e causa " + dano + " de dano!");
+        } else {
+            System.out.println("Ares nÃ£o pode usar esta habilidade!");
+        }
+    }
+
+    // Sobrescreve o metodo do guerreiro com versÃ£o mais agressiva
+    @Override
+    public void investidaFuriosa(model.interfaces.ICombatente alvo) {
+        int danoExtra = (int) (getForca() * 2.5);
+        alvo.receberDano(danoExtra);
+        System.out.println("Ares executa uma Investida Sangrenta causando " +
+                danoExtra + " de dano devastador!");
+
+        // Ares ganha um bÃ´nus de forÃ§a apÃ³s a investida
+        setForca(getForca() + 2);
+        System.out.println("Ares fica mais furioso! ForÃ§a aumentada!");
+    }
+
+    // Metodo especial para SeduÃ§Ã£o da Guerra
+    public void seducaoDaGuerra() {
+        System.out.println("Ares seduz com o chamado da guerra!");
+
+        // Aumenta drasticamente o dano mas reduz a defesa
+        setForca(getForca() + 5);
+        setDefesa(getDefesa() - 3);
+
+        System.out.println("ForÃ§a aumentada em 5, defesa reduzida em 3!");
+    }
+
+    // Habilidade de guerra - EstratÃ©gia Militar
+    public void estrategiaMilitar(model.interfaces.ICombatente alvo) {
+        System.out.println("Ares implementa sua EstratÃ©gia Militar!");
+
+        // Dano baseado na defesa do inimigo (quanto mais defesa, mais dano)
+        int danoEstrategico = (int) (getForca() * 1.5 + getDefesa() * 0.8);
+        alvo.receberDano(danoEstrategico);
+
+        System.out.println("Dano estratÃ©gico: " + danoEstrategico +
+                " | Ares explora as fraquezas tÃ¡ticas do inimigo!");
+    }
+}
+package model.personagens.inimigos.deuses.gregos;
+
+import model.habilidades.Habilidade;
+import model.habilidades.TipoHabilidade;
+import model.personagens.MagoInimigo;
+
+import java.util.Arrays;
+
+public class Atena extends MagoInimigo {
+
+    public Atena() {
+        super("Atena", 110, 10, 7, 100, // Menos vida e defesa, mas mais mana que Ragnar
+                Arrays.asList(
+                        new Habilidade("Sabedoria Divina", TipoHabilidade.MAGICO,
+                                25, 3, 0.95, false), // 10 * 2.5
+                        new Habilidade("LanÃ§a da VitÃ³ria", TipoHabilidade.MAGICO,
+                                30, 4, 0.9, false), // 10 * 3
+                        new Habilidade("Escudo de Ã‰gide", TipoHabilidade.MAGICO,
+                                35, 5, 0.85, false) // 10 * 3.5
+                ));
+    }
+
+    @Override
+    public boolean podeUsarHabilidade(Habilidade habilidade) {
+        // Atena pode usar habilidades mÃ¡gicas se tiver mana suficiente
+        return habilidade.getTipo() == TipoHabilidade.MAGICO &&
+                getPontosMagia() >= habilidade.getCustoMana();
+    }
+
+    @Override
+    public void usarHabilidade(Habilidade habilidade, model.interfaces.ICombatente alvo) {
+        if (podeUsarHabilidade(habilidade)) {
+            // Atena tem 25% de chance de crÃ­tico mÃ¡gico (mais que Ragnar)
+            int dano = habilidade.calcularDano(getForca());
+
+            if (Math.random() < 0.25) {
+                dano = (int) (dano * 1.6);
+                System.out.println("CRÃTICO DIVINO!");
+            }
+
+            setPontosMagia(getPontosMagia() - habilidade.getCustoMana());
+            alvo.receberDano(dano);
+            System.out.println("Atena invoca " + habilidade.getNome() +
+                    " com poder divino e causa " + dano + " de dano mÃ¡gico!");
+        } else {
+            System.out.println("Atena nÃ£o pode usar esta habilidade!");
+        }
+    }
+
+    // Sobrescreve o metodo do mago com versÃ£o divina
+    @Override
+    public void explosaoArcana(model.interfaces.ICombatente alvo) {
+        if (getPontosMagia() >= 12) {
+            setPontosMagia(getPontosMagia() - 12);
+            int dano = (int) (getForca() * 2.2 + getPontosMagia() * 0.6);
+            alvo.receberDano(dano);
+            System.out.println("Atena libera uma ExplosÃ£o Arcana Divina causando " +
+                    dano + " de dano celestial!");
+        } else {
+            System.out.println("Atena nÃ£o tem magia suficiente para esta habilidade!");
+        }
+    }
+
+    // Habilidade Ãºnica de Atena - Sabedoria EstratÃ©gica
+    public void sabedoriaEstrategica(model.interfaces.ICombatente alvo) {
+        System.out.println("Atena utiliza sua Sabedoria EstratÃ©gica!");
+
+        // Analisa o alvo e aplica dano baseado na defesa do inimigo
+        int danoBase = getForca() * 2;
+        int danoBonus = (int) (getDefesa() * 0.5); // Dano extra baseado na defesa do alvo
+        int danoTotal = danoBase + danoBonus;
+
+        alvo.receberDano(danoTotal);
+        System.out.println("Atena encontra a fraqueza do inimigo causando " +
+                danoTotal + " de dano estratÃ©gico! (Bonus por defesa: " + danoBonus + ")");
+
+        // Recupera 10% da mana gasta no prÃ³ximo turno
+        setPontosMagia(getPontosMagia() + (int) (danoTotal * 0.1));
+    }
+
+    // Metodo especial para ProteÃ§Ã£o Divina
+    public void protecaoDivina() {
+        int escudo = (int) (getVidaMaxima() * 0.3);
+        int regeneracaoMana = (int) (getPontosMagia() * 0.25);
+
+        // Cria um escudo protetor
+        System.out.println("Atena invoca uma ProteÃ§Ã£o Divina, criando um escudo de " +
+                escudo + " pontos e recuperando " + regeneracaoMana + " de magia!");
+
+        // ImplementaÃ§Ã£o do escudo dependeria da lÃ³gica do jogo
+        curar(escudo); // Simula o escudo como cura temporÃ¡ria
+        setPontosMagia(getPontosMagia() + regeneracaoMana);
+    }
+}
+package model.personagens.inimigos.deuses.gregos;
+
+import model.habilidades.Habilidade;
+import model.habilidades.TipoHabilidade;
+import model.interfaces.ICombatente;
+import model.personagens.GuerreiroInimigo;
+
+import java.util.Arrays;
+
+public class Hades extends GuerreiroInimigo {
+
+    public Hades() {
+        super("Hades", 160, 16, 12,
+                Arrays.asList(
+                        new Habilidade("LÃ¢mina das Sombras", TipoHabilidade.FISICO,
+                                32, 2, 0.9, false), // 16 * 2
+                        new Habilidade("Toque da Morte", TipoHabilidade.FISICO,
+                                40, 3, 0.85, false), // 16 * 2.5
+                        new Habilidade("Punho do Submundo", TipoHabilidade.FISICO,
+                                48, 4, 0.75, false) // 16 * 3
+                ));
+    }
+
+    @Override
+    public boolean podeUsarHabilidade(Habilidade habilidade) {
+        // Hades pode usar qualquer habilidade fÃ­sica
+        return habilidade.getTipo() == TipoHabilidade.FISICO;
+    }
+
+    @Override
+    public void usarHabilidade(Habilidade habilidade, ICombatente alvo) {
+        if (podeUsarHabilidade(habilidade)) {
+            //tem 20% de chance de dano crÃ­tico
+            int dano = habilidade.calcularDano(getForca());
+            if (Math.random() < 0.2) {
+                dano = (int) (dano * 1.5);
+                System.out.println("DANO CRÃTICO!");
+            }
+
+            alvo.receberDano(dano);
+            System.out.println("Hades usa " + habilidade.getNome() +
+                    " com poder divino e causa " + dano + " de dano!");
+        } else {
+            System.out.println("Hades nÃ£o pode usar esta habilidade!");
+        }
+    }
+
+    // Sobrescreve o metodo do guerreiro com versÃ£o sombria
+    @Override
+    public void investidaFuriosa(ICombatente alvo) {
+        int danoExtra = (int) (getForca() * 2.2); // Mais poderoso que um guerreiro comum
+        alvo.receberDano(danoExtra);
+        System.out.println("Hades executa uma Investida das Trevas causando " +
+                danoExtra + " de dano e enfraquecendo o alvo!");
+
+        // LÃ³gica para aplicar enfraquecimento seria implementada aqui
+    }
+
+    // Habilidade Ãºnica de Hades - Invoca espÃ­ritos do submundo
+    public void invocacaoEspiritual(ICombatente alvo) {
+        System.out.println("Hades invoca espÃ­ritos do Submundo!");
+
+        // Ataques mÃºltiplos com chance de ignorar defesa
+        for (int i = 0; i < 2; i++) {
+            int danoBase = getForca() + (int) (Math.random() * getForca() / 2);
+
+            // 40% de chance de ignorar defesa
+            if (Math.random() < 0.4) {
+                danoBase = (int) (danoBase * 1.2); // Dano aumentado quando ignora defesa
+                System.out.println("O espÃ­rito atravessa as defesas!");
+            }
+
+            alvo.receberDano(danoBase);
+            System.out.println("EspÃ­rito " + (i + 1) + ": " + danoBase + " de dano!");
+        }
+    }
+
+    // Habilidade Ãºnica para manipular as sombras
+    public void mantoDasSombras(model.interfaces.ICombatente alvo) {
+        System.out.println("Hades se envolve em um manto de sombras!");
+
+        // MÃºltiplos ataques
+        for (int i = 0; i < 3; i++) {
+            int dano = getForca() + (int) (Math.random() * getForca());
+            alvo.receberDano(dano);
+            System.out.println("Ataque " + (i + 1) + ": " + dano + " de dano!");
+        }
+    }
+
+    // Metodo especial para recuperar vida
+    public void olharAmedrontador() {
+        int cura = getVidaMaxima() / 4;
+        curar(cura);
+        System.out.println("Hades usa sua heranÃ§a divina para recuperar " +
+                cura + " pontos de vida!");
+    }
+}
+package model.personagens.inimigos.deuses.gregos;
+
+import model.habilidades.Habilidade;
+import model.habilidades.TipoHabilidade;
+import model.personagens.MagoInimigo;
+
+import java.util.Arrays;
+
+public class Poseidon extends MagoInimigo {
+
+    public Poseidon() {
+        super("Poseidon", 130, 12, 8, 90, // Mais vida e forÃ§a que Atena, menos mana
+                Arrays.asList(
+                        new Habilidade("Tridente dos Mares", TipoHabilidade.MAGICO,
+                                30, 4, 0.9, false), // 12 * 2.5
+                        new Habilidade("Tsunami Devastador", TipoHabilidade.MAGICO,
+                                36, 5, 0.85, false), // 12 * 3
+                        new Habilidade("FÃºria dos Oceanos", TipoHabilidade.MAGICO,
+                                42, 6, 0.8, false) // 12 * 3.5
+                ));
+    }
+
+    @Override
+    public boolean podeUsarHabilidade(Habilidade habilidade) {
+        // Poseidon pode usar habilidades mÃ¡gicas se tiver mana suficiente
+        return habilidade.getTipo() == TipoHabilidade.MAGICO &&
+                getPontosMagia() >= habilidade.getCustoMana();
+    }
+
+    @Override
+    public void usarHabilidade(Habilidade habilidade, model.interfaces.ICombatente alvo) {
+        if (podeUsarHabilidade(habilidade)) {
+            // Poseidon tem 20% de chance de crÃ­tico mÃ¡gico com stun
+            int dano = habilidade.calcularDano(getForca());
+
+            if (Math.random() < 0.2) {
+                dano = (int) (dano * 1.7);
+                System.out.println("CRÃTICO MARINHO! O inimigo foi atordoado pelas ondas!");
+                // Aqui seria implementado o efeito de stun se o sistema permitisse
+            }
+
+            setPontosMagia(getPontosMagia() - habilidade.getCustoMana());
+            alvo.receberDano(dano);
+            System.out.println("Poseidon invoca " + habilidade.getNome() +
+                    " com poder dos mares e causa " + dano + " de dano aquÃ¡tico!");
+        } else {
+            System.out.println("Poseidon nÃ£o pode usar esta habilidade!");
+        }
+    }
+
+    // Sobrescreve o metodo do mago com versÃ£o marinha
+    @Override
+    public void explosaoArcana(model.interfaces.ICombatente alvo) {
+        if (getPontosMagia() >= 15) {
+            setPontosMagia(getPontosMagia() - 15);
+            int dano = (int) (getForca() * 2.8 + getPontosMagia() * 0.4);
+            alvo.receberDano(dano);
+            System.out.println("Poseidon libera uma ExplosÃ£o Arcana Marinha causando " +
+                    dano + " de dano devastador das profundezas!");
+        } else {
+            System.out.println("Poseidon nÃ£o tem magia suficiente para esta habilidade!");
+        }
+    }
+
+    // Habilidade Ãºnica de Poseidon - FÃºria dos Mares
+    public void furiaDosMares(model.interfaces.ICombatente alvo) {
+        System.out.println("Poseidon desencadeia a FÃºria dos Mares!");
+
+        // Ataque em Ã¡rea que causa dano mÃºltiplo baseado na forÃ§a e mana
+        for (int i = 0; i < 2; i++) {
+            int danoBase = getForca() * 2;
+            int danoMarinho = (int) (getPontosMagia() * 0.4);
+            int danoTotal = danoBase + danoMarinho;
+
+            alvo.receberDano(danoTotal);
+            System.out.println("Onda " + (i + 1) + ": " + danoTotal +
+                    " de dano aquÃ¡tico! (Base: " + danoBase + ", Marinho: " + danoMarinho + ")");
+        }
+
+        // Reduz a defesa do alvo apÃ³s o ataque
+        System.out.println("A fÃºria dos mares enfraquece a defesa do inimigo!");
+    }
+
+    // Metodo especial para MarÃ© Alta
+    public void mareAlta() {
+        int curaMarinha = (int) (getVidaMaxima() * 0.25);
+        int manaDasProfundezas = (int) (getPontosMagia() * 0.3);
+
+        System.out.println("Poseidon invoca a MarÃ© Alta, recuperando " +
+                curaMarinha + " de vida e " + manaDasProfundezas + " de magia das profundezas!");
+
+        curar(curaMarinha);
+        setPontosMagia(getPontosMagia() + manaDasProfundezas);
+    }
+
+}
+package model.personagens.inimigos.deuses.gregos;
+
+import model.habilidades.Habilidade;
+import model.habilidades.TipoHabilidade;
+import model.interfaces.ICombatente;
+import model.personagens.MagoInimigo;
+
+import java.util.Arrays;
+
+public class Zeus extends MagoInimigo {
+
+    public Zeus() {
+        super("Zeus", 120, 10, 8, 100,
+                Arrays.asList(
+                        new Habilidade("Sabedoria Suprema", TipoHabilidade.MAGICO,
+                                25, 3, 0.95, false),
+                        new Habilidade("Chama Destruidora", TipoHabilidade.MAGICO,
+                                40, 4, 0.99, false),
+                        new Habilidade("DesolaÃ§Ã£o Divina", TipoHabilidade.MAGICO,
+                                35, 5, 0.85, false)
+                ));
+    }
+
+    @Override
+    public boolean podeUsarHabilidade(Habilidade habilidade) {
+        // Zeus pode usar habilidades mÃ¡gicas se tiver mana suficiente
+        return habilidade.getTipo() == TipoHabilidade.MAGICO &&
+                getPontosMagia() >= habilidade.getCustoMana();
+    }
+
+    @Override
+    public void usarHabilidade(Habilidade habilidade, model.interfaces.ICombatente alvo) {
+        if (podeUsarHabilidade(habilidade)) {
+            // Zeus tem 25% de chance de crÃ­tico mÃ¡gico (mais que Ragnar)
+            int dano = habilidade.calcularDano(getForca());
+
+            if (Math.random() < 0.25) {
+                dano = (int) (dano * 1.6);
+                System.out.println("CRÃTICO DIVINO!");
+            }
+
+            setPontosMagia(getPontosMagia() - habilidade.getCustoMana());
+            alvo.receberDano(dano);
+            System.out.println("Zeus invoca " + habilidade.getNome() +
+                    " com poder divino e causa " + dano + " de dano mÃ¡gico!");
+        } else {
+            System.out.println("Zeus nÃ£o pode usar esta habilidade!");
+        }
+    }
+
+    // Sobrescreve o metodo do mago com versÃ£o divina
+    @Override
+    public void explosaoArcana(ICombatente alvo) {
+        if (getPontosMagia() >= 12) {
+            setPontosMagia(getPontosMagia() - 12);
+            int dano = (int) (getForca() * 2.3 + getPontosMagia() * 0.8);
+            alvo.receberDano(dano);
+            System.out.println("Zeus libera uma ExplosÃ£o Arcana Divina causando " +
+                    dano + " de dano celestial!");
+        } else {
+            System.out.println("Zeus nÃ£o tem magia suficiente para esta habilidade!");
+        }
+    }
+
+    // Habilidade Ãºnica de Zeus - Sabedoria EstratÃ©gica
+    public void saberSupremo(ICombatente alvo) {
+        System.out.println("Zeus utiliza seu saber supremo!");
+
+        // Analisa o alvo e aplica dano baseado na defesa do inimigo
+        int danoBase = getForca() * 2;
+        int danoBonus = (int) (getDefesa() * 0.6); // Dano extra baseado na defesa do alvo
+        int danoTotal = danoBase + danoBonus;
+
+        alvo.receberDano(danoTotal);
+        System.out.println("Zeus encontra a fraqueza do inimigo causando " +
+                danoTotal + " de dano estratÃ©gico! (Bonus por defesa: " + danoBonus + ")");
+
+        // Recupera 10% da mana gasta no prÃ³ximo turno
+        setPontosMagia(getPontosMagia() + (int) (danoTotal * 0.2));
+    }
+
+    // Metodo especial
+    public void ataqueCelestial() {
+        int escudo = (int) (getVidaMaxima() * 0.3);
+        int regeneracaoMana = (int) (getPontosMagia() * 0.25);
+
+        System.out.println("Zeus invoca o ataque celestial, criando um escudo de " +
+                escudo + " pontos e recuperando " + regeneracaoMana + " de magia!");
+
+        // ImplementaÃ§Ã£o do escudo dependeria da lÃ³gica do jogo
+        curar(escudo); // Simula o escudo como cura
+        setPontosMagia(getPontosMagia() + regeneracaoMana);
+    }
+}
+package view;
+
+import Controller.*;
+import javax.swing.*;
+import java.awt.*;
+
+public class MainFrame extends JFrame {
+    private Torre torre;
+    private Batalha batalhaAtual;
+    private JTextArea logArea;
+    private JLabel statusLabel;
+
+    public MainFrame() {
+        setTitle("Torre dos Deuses");
+        setSize(800, 600);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout());
+
+        logArea = new JTextArea();
+        logArea.setEditable(false);
+        add(new JScrollPane(logArea), BorderLayout.CENTER);
+
+        statusLabel = new JLabel("Bem-vindo Ã  Torre!");
+        add(statusLabel, BorderLayout.NORTH);
+
+        JPanel botoes = new JPanel();
+        JButton btnAtacar = new JButton("Atacar");
+        JButton btnDefender = new JButton("Defender");
+        JButton btnHabilidade = new JButton("Habilidade");
+        JButton btnFugir = new JButton("Fugir");
+        botoes.add(btnAtacar);
+        botoes.add(btnDefender);
+        botoes.add(btnHabilidade);
+        botoes.add(btnFugir);
+        add(botoes, BorderLayout.SOUTH);
+
+        iniciarJogo();
+
+        btnAtacar.addActionListener(e -> executarTurno(Batalha.AcaoBatalha.ATACAR));
+        btnDefender.addActionListener(e -> executarTurno(Batalha.AcaoBatalha.DEFENDER));
+        btnHabilidade.addActionListener(e -> executarTurno(Batalha.AcaoBatalha.USAR_HABILIDADE));
+        btnFugir.addActionListener(e -> executarTurno(Batalha.AcaoBatalha.FUGIR));
+    }
+
+    private void iniciarJogo() {
+        Jogo jogo = new Jogo();
+        String[] herois = {"Aquiles", "HÃ©rcules", "Perseu", "Ragnar", "Gilgamesh"};
+        int escolha = JOptionPane.showOptionDialog(this, "Escolha seu herÃ³i:", "HerÃ³is",
+                JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, herois, herois[0]);
+        jogo.escolherHeroi(escolha + 1);
+
+        jogo.carregarInimigos(1);
+        torre = new Torre(jogo);
+        iniciarNovoAndar();
+    }
+
+    private void iniciarNovoAndar() {
+        if (torre.iniciarAndar()) {
+            batalhaAtual = torre.getBatalhaAtual();
+            atualizarTela();
+        } else {
+            JOptionPane.showMessageDialog(this, "VocÃª conquistou a Torre!");
+        }
+    }
+
+    private void executarTurno(Batalha.AcaoBatalha acao) {
+        if (batalhaAtual == null) return;
+        batalhaAtual.executarTurno(acao);
+        atualizarTela();
+        if (batalhaAtual.isBatalhaFinalizada()) {
+            if (batalhaAtual.isJogadorVencedor()) {
+                JOptionPane.showMessageDialog(this, "VitÃ³ria! Subindo...");
+                iniciarNovoAndar();
+            } else {
+                JOptionPane.showMessageDialog(this, "VocÃª foi derrotado!");
+            }
+        }
+    }
+
+    private void atualizarTela() {
+        statusLabel.setText("Andar " + torre.getAndarAtual() + "/" + torre.getTotalAndares() +
+                " | " + batalhaAtual.getStatusVida());
+        logArea.setText(String.join("\n", batalhaAtual.getLogBatalha()));
+    }
+}

@@ -1,81 +1,102 @@
 package model.personagens;
 
-import model.calculadora.CalculadoraDano;
+import model.interfaces.ICombatente;
 import model.habilidades.Habilidade;
-import model.interfaces.IAtacante;
-import model.interfaces.IAtacavel;
+import model.interfaces.IHabilidade;
 
-public class Personagem implements IAtacante, IAtacavel {
+import java.util.ArrayList;
+import java.util.List;
+
+public abstract class Personagem implements ICombatente, IHabilidade {
     protected String nome;
-    protected Atributos atributos;
-    protected Status status;
-    protected Habilidade habilidadeEspecial;
-    protected int pontosDisponiveis;
+    protected int pontosVida;
+    protected int pontosVidaMaximos;
+    protected int forca;
+    protected int defesa;
+    protected List<Habilidade> habilidades;
+    protected boolean defendendo;
 
-    public Personagem(String nome, Atributos atributos, Status status) {
+    public Personagem(String nome, int pontosVida, int forca, int defesa) {
         this.nome = nome;
-        this.atributos = atributos;
-        this.status = new Status(atributos);
-        this.pontosDisponiveis = 50;
-    }
-
-    public void ataqueBasico(Personagem inimigo) {
-        int dano = 10;
-        inimigo.receberDano(dano);
-        System.out.println(nome + " realizou um ataque básico e causou " + dano + " de dano em " + inimigo.getNome());
+        this.pontosVida = pontosVida;
+        this.pontosVidaMaximos = pontosVida;
+        this.forca = forca;
+        this.defesa = defesa;
+        this.habilidades = new ArrayList<>();
+        this.defendendo = false;
     }
 
     @Override
-    public void receberDano(int dano) {
-        status.reduzirVida(dano);
-    }
-
-    @Override
-    public boolean estaVivo() {
-        return status.getVidaAtual() > 0;
-    }
-
     public String getNome() {
         return nome;
     }
 
-    public Atributos getAtributos() {
-        return atributos;
+    @Override
+    public int getVidaAtual() {
+        return pontosVida;
     }
 
-    public Status getStatus() {
-        return status;
+    @Override
+    public int getVidaMaxima() {
+        return pontosVidaMaximos;
     }
 
-    public int getPontosDisponiveis() {
-        return pontosDisponiveis;
+    @Override
+    public boolean estaVivo() {
+        return pontosVida > 0;
     }
 
-    public void distribuirPontos(String atributo, int quantidade) {
-        if (quantidade <= pontosDisponiveis) {
-            switch (atributo.toLowerCase()) {
-                case "forca" -> this.atributos.aumentarForca(quantidade);
-                case "agilidade" -> this.atributos.aumentarAgilidade(quantidade);
-                case "inteligencia" -> this.atributos.aumentarInteligencia(quantidade);
-                case "constituicao" -> this.atributos.aumentarConstituicao(quantidade);
-                default -> throw new IllegalArgumentException("Atributo inválido!");
-            }
-            this.pontosDisponiveis -= quantidade;
-        } else {
-            System.out.println("Pontos insuficientes para distribuir!");
+    @Override
+    public void receberDano(int dano) {
+        int danoFinal = Math.max(0, dano - (defendendo ? defesa * 2 : 0));
+        pontosVida = Math.max(0, pontosVida - danoFinal);
+        defendendo = false; // Reset defesa após receber dano
+    }
+
+    @Override
+    public int calcularAtaque() {
+        return forca + (int) (Math.random() * 4); // Variação 0-3
+    }
+
+    @Override
+    public int calcularDefesa() {
+        return defesa + (defendendo ? defesa : 0);
+    }
+
+    @Override
+    public List<Habilidade> getHabilidades() {
+        return new ArrayList<>(habilidades);
+    }
+
+    @Override
+    public void adicionarHabilidade(Habilidade habilidade) {
+        if (habilidade != null) {
+            habilidades.add(habilidade);
         }
     }
 
-
-    @Override
-    public void atacar(Personagem alvo) {
-        int dano = new CalculadoraDano().calcularDanoFisico(this, alvo);
-        System.out.println(nome + " atacou " + alvo.getNome() + " causando " + dano + " de dano!");
+    public void defender() {
+        this.defendendo = true;
     }
 
-    @Override
-    public void usarHabilidade(Habilidade habilidade, Personagem alvo) {
-
+    public void curar(int quantidade) {
+        pontosVida = Math.min(pontosVidaMaximos, pontosVida + quantidade);
     }
 
+    // Getters para subclasses
+    protected int getForca() {
+        return forca;
+    }
+
+    protected int getDefesa() {
+        return defesa;
+    }
+
+    protected void setForca(int forca) {
+        this.forca = forca;
+    }
+
+    protected void setDefesa(int defesa) {
+        this.defesa = defesa;
+    }
 }
