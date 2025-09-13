@@ -3,8 +3,8 @@ package model.personagens.herois;
 import model.habilidades.Habilidade;
 import model.habilidades.TipoHabilidade;
 import model.personagens.Mago;
-
 import java.util.Arrays;
+import static util.Cores.*;
 
 public class Ragnar extends Mago {
 
@@ -35,15 +35,15 @@ public class Ragnar extends Mago {
 
             if (Math.random() < 0.2) {
                 dano = (int) (dano * 1.5);
-                System.out.println("CRÍTICO MÁGICO!");
+                System.out.println(AMARELO + "\nCRÍTICO MÁGICO!" + RESET);
             }
 
             setPontosMagia(getPontosMagia() - habilidade.getCustoMana());
             alvo.receberDano(dano);
-            System.out.println("Ragnar invoca " + habilidade.getNome() +
-                    " com poder nórdico e causa " + dano + " de dano mágico!");
+            System.out.println(AMARELO + "\nRagnar invoca " + habilidade.getNome() +
+                    " com poder nórdico e causa " + dano + " de dano mágico!" + RESET);
         } else {
-            System.out.println("Ragnar não pode usar esta habilidade!");
+            System.out.println(AMARELO + "\nRagnar não pode usar esta habilidade!" + RESET);
         }
     }
 
@@ -54,16 +54,16 @@ public class Ragnar extends Mago {
             setPontosMagia(getPontosMagia() - 15);
             int dano = (int) (getForca() * 2.5 + getPontosMagia() * 0.5);
             alvo.receberDano(dano);
-            System.out.println("Ragnar libera uma Explosão Arcana Nórdica causando " +
-                    dano + " de dano devastador!");
+            System.out.println(AMARELO + "\nRagnar libera uma Explosão Arcana Nórdica causando " +
+                    dano + " de dano devastador!" + RESET);
         } else {
-            System.out.println("Ragnar não tem magia suficiente para esta habilidade!");
+            System.out.println(AMARELO + "\nRagnar não tem magia suficiente para esta habilidade!" + RESET);
         }
     }
 
     // Habilidade única de Ragnar - Berserker Místico
     public void berserkerMistico(model.interfaces.ICombatente alvo) {
-        System.out.println("Ragnar entra em estado de Berserker Místico!");
+        System.out.println(AMARELO + "\nRagnar entra em estado de Berserker Místico!" + RESET);
 
         // Combina dano físico e mágico em múltiplos ataques
         for (int i = 0; i < 3; i++) {
@@ -72,9 +72,9 @@ public class Ragnar extends Mago {
             int danoTotal = danoFisico + danoMagico;
 
             alvo.receberDano(danoTotal);
-            System.out.println("Ataque Berserker " + (i + 1) + ": " +
+            System.out.println(AMARELO + "\nAtaque Berserker " + (i + 1) + ": " +
                     danoTotal + " de dano (Físico: " + danoFisico +
-                    ", Mágico: " + danoMagico + ")");
+                    ", Mágico: " + danoMagico + ")" + RESET);
         }
 
         // Consome 20% da mana atual
@@ -89,7 +89,7 @@ public class Ragnar extends Mago {
         curar(cura);
         setPontosMagia(getPontosMagia() + manaRecuperada);
 
-        System.out.println("Ragnar invoca a regeneração nórdica, recuperando " +
-                cura + " de vida e " + manaRecuperada + " de magia!");
+        System.out.println(AMARELO + "\nRagnar invoca a regeneração nórdica, recuperando " +
+                cura + " de vida e " + manaRecuperada + " de magia!" + RESET);
     }
 }

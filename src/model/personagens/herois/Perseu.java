@@ -3,7 +3,7 @@ package model.personagens.herois;
 import model.habilidades.Habilidade;
 import model.habilidades.TipoHabilidade;
 import model.personagens.Guerreiro;
-
+import static util.Cores.*;
 import java.util.Arrays;
 
 public class Perseu extends Guerreiro {
@@ -34,15 +34,15 @@ public class Perseu extends Guerreiro {
 
             // Chance de esquiva ágil
             if (Math.random() < 0.25) {
-                System.out.println("Perseu esquiva com agilidade e contra-ataca!");
+                System.out.println(AMARELO + "\nPerseu esquiva com agilidade e contra-ataca!" + RESET);
                 dano = (int) (dano * 1.3);
             }
 
             alvo.receberDano(dano);
-            System.out.println("Perseu usa " + habilidade.getNome() +
-                    " com precisão heroica e causa " + dano + " de dano!");
+            System.out.println(AMARELO + "\nPerseu usa " + habilidade.getNome() +
+                    " com precisão heroica e causa " + dano + " de dano!" + RESET);
         } else {
-            System.out.println("Perseu não pode usar esta habilidade!");
+            System.out.println(AMARELO + "\nPerseu não pode usar esta habilidade!" + RESET);
         }
     }
 
@@ -51,19 +51,19 @@ public class Perseu extends Guerreiro {
     public void investidaFuriosa(model.interfaces.ICombatente alvo) {
         int danoBase = getForca() + getDefesa(); // Usa força + defesa para representar agilidade
         alvo.receberDano(danoBase);
-        System.out.println("Perseu executa uma Investida Ágil causando " +
-                danoBase + " de dano preciso!");
+        System.out.println(AMARELO + "\nPerseu executa uma Investida Ágil causando " +
+                danoBase + " de dano preciso!" + RESET);
     }
 
     // Habilidade única de Perseu - Reflexos Sobrenaturais
     public void reflexosSobrenaturais(model.interfaces.ICombatente alvo) {
-        System.out.println("Perseu ativa seus Reflexos Sobrenaturais!");
+        System.out.println(AMARELO + "\nPerseu ativa seus Reflexos Sobrenaturais!" + RESET);
 
         // Ataques rápidos e precisos baseados na força e defesa
         for (int i = 0; i < 4; i++) {
             int dano = (getForca() / 2) + (int) (Math.random() * getDefesa());
             alvo.receberDano(dano);
-            System.out.println("Ataque Rápido " + (i + 1) + ": " + dano + " de dano preciso!");
+            System.out.println(AMARELO + "\nAtaque Rápido " + (i + 1) + ": " + dano + " de dano preciso!" + RESET);
         }
     }
 
@@ -73,8 +73,8 @@ public class Perseu extends Guerreiro {
         // Implementação temporária - aumenta a defesa temporariamente
         int defesaOriginal = getDefesa();
         setDefesa(defesaOriginal + defesaExtra);
-        System.out.println("Perseu usa o Escudo de Atena, aumentando sua defesa em " +
-                defesaExtra + " pontos! Defesa atual: " + getDefesa());
+        System.out.println(AMARELO + "\nPerseu usa o Escudo de Atena, aumentando sua defesa em " +
+                defesaExtra + " pontos! Defesa atual: " + RESET + getDefesa());
 
         // Em uma implementação completa, precisaria de um mecanismo para
         // reverter este aumento após alguns turnos

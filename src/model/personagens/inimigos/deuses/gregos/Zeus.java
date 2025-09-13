@@ -4,7 +4,7 @@ import model.habilidades.Habilidade;
 import model.habilidades.TipoHabilidade;
 import model.interfaces.ICombatente;
 import model.personagens.MagoInimigo;
-
+import static util.Cores.*;
 import java.util.Arrays;
 
 public class Zeus extends MagoInimigo {
@@ -36,15 +36,15 @@ public class Zeus extends MagoInimigo {
 
             if (Math.random() < 0.25) {
                 dano = (int) (dano * 1.6);
-                System.out.println("CRÍTICO DIVINO!");
+                System.out.println(AMARELO + "\nCRÍTICO DIVINO!" + RESET);
             }
 
             setPontosMagia(getPontosMagia() - habilidade.getCustoMana());
             alvo.receberDano(dano);
-            System.out.println("Zeus invoca " + habilidade.getNome() +
-                    " com poder divino e causa " + dano + " de dano mágico!");
+            System.out.println(AMARELO + "\nZeus invoca " + habilidade.getNome() +
+                    " com poder divino e causa " + dano + " de dano mágico!" + RESET);
         } else {
-            System.out.println("Zeus não pode usar esta habilidade!");
+            System.out.println(AMARELO + "\nZeus não pode usar esta habilidade!" + RESET);
         }
     }
 
@@ -55,16 +55,16 @@ public class Zeus extends MagoInimigo {
             setPontosMagia(getPontosMagia() - 12);
             int dano = (int) (getForca() * 2.3 + getPontosMagia() * 0.8);
             alvo.receberDano(dano);
-            System.out.println("Zeus libera uma Explosão Arcana Divina causando " +
-                    dano + " de dano celestial!");
+            System.out.println(AMARELO + "\nZeus libera uma Explosão Arcana Divina causando " +
+                    dano + " de dano celestial!" + RESET);
         } else {
-            System.out.println("Zeus não tem magia suficiente para esta habilidade!");
+            System.out.println(AMARELO + "\nZeus não tem magia suficiente para esta habilidade!" + RESET);
         }
     }
 
     // Habilidade única de Zeus - Sabedoria Estratégica
     public void saberSupremo(ICombatente alvo) {
-        System.out.println("Zeus utiliza seu saber supremo!");
+        System.out.println(AMARELO + "\nZeus utiliza seu saber supremo!" + RESET);
 
         // Analisa o alvo e aplica dano baseado na defesa do inimigo
         int danoBase = getForca() * 2;
@@ -72,8 +72,8 @@ public class Zeus extends MagoInimigo {
         int danoTotal = danoBase + danoBonus;
 
         alvo.receberDano(danoTotal);
-        System.out.println("Zeus encontra a fraqueza do inimigo causando " +
-                danoTotal + " de dano estratégico! (Bonus por defesa: " + danoBonus + ")");
+        System.out.println(AMARELO + "\nZeus encontra a fraqueza do inimigo causando " +
+                danoTotal + " de dano estratégico! (Bonus por defesa: " + danoBonus + ")" + RESET);
 
         // Recupera 10% da mana gasta no próximo turno
         setPontosMagia(getPontosMagia() + (int) (danoTotal * 0.2));
@@ -84,8 +84,8 @@ public class Zeus extends MagoInimigo {
         int escudo = (int) (getVidaMaxima() * 0.3);
         int regeneracaoMana = (int) (getPontosMagia() * 0.25);
 
-        System.out.println("Zeus invoca o ataque celestial, criando um escudo de " +
-                escudo + " pontos e recuperando " + regeneracaoMana + " de magia!");
+        System.out.println(AMARELO + "\nZeus invoca o ataque celestial, criando um escudo de " +
+                escudo + " pontos e recuperando " + regeneracaoMana + " de magia!" + RESET);
 
         // Implementação do escudo dependeria da lógica do jogo
         curar(escudo); // Simula o escudo como cura

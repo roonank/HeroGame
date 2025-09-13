@@ -6,6 +6,8 @@ import model.personagens.Mago;
 
 import java.util.Arrays;
 
+import static util.Cores.*;
+
 public class Gilgamesh extends Mago {
 
     public Gilgamesh() {
@@ -35,15 +37,15 @@ public class Gilgamesh extends Mago {
 
             if (Math.random() < 0.25) {
                 dano = (int) (dano * 1.6);
-                System.out.println("PODER REAL DE GILGAMESH!");
+                System.out.println(AMARELO + "\nPODER REAL DE GILGAMESH!" + RESET);
             }
 
             setPontosMagia(getPontosMagia() - habilidade.getCustoMana());
             alvo.receberDano(dano);
-            System.out.println("Gilgamesh conjura " + habilidade.getNome() +
-                    " com autoridade real e causa " + dano + " de dano majestoso!");
+            System.out.println(AMARELO + "\nGilgamesh conjura " + habilidade.getNome() +
+                    " com autoridade real e causa " + dano + " de dano majestoso!" + RESET);
         } else {
-            System.out.println("Gilgamesh não pode usar esta habilidade!");
+            System.out.println(AMARELO + "\nGilgamesh não pode usar esta habilidade!" + RESET);
         }
     }
 
@@ -54,16 +56,16 @@ public class Gilgamesh extends Mago {
             setPontosMagia(getPontosMagia() - 20);
             int dano = (int) (getForca() * 3.0 + getPontosMagia() * 0.4);
             alvo.receberDano(dano);
-            System.out.println("Gilgamesh libera uma Explosão da realeza causando " +
-                    dano + " de dano imperial!");
+            System.out.println(AMARELO + "\nGilgamesh libera uma Explosão da realeza causando " +
+                    dano + " de dano imperial!" + RESET);
         } else {
-            System.out.println("Gilgamesh não tem magia suficiente para esta habilidade!");
+            System.out.println(AMARELO + "\nGilgamesh não tem magia suficiente para esta habilidade!" + RESET);
         }
     }
 
     // Habilidade única de Gilgamesh - Exército de Argila
     public void exercitoDeArgila(model.interfaces.ICombatente alvo) {
-        System.out.println("Gilgamesh convoca seu Exército de Argila!");
+        System.out.println(AMARELO + "\nGilgamesh convoca seu Exército de Argila!" + RESET);
 
         // Múltiplos ataques de criaturas de argila
         for (int i = 0; i < 4; i++) {
@@ -72,15 +74,15 @@ public class Gilgamesh extends Mago {
             int danoTotal = danoBase + danoMagico;
 
             alvo.receberDano(danoTotal);
-            System.out.println("Golem de Argila " + (i + 1) + ": " +
+            System.out.println(AMARELO + "\nGolem de Argila " + (i + 1) + ": " +
                     danoTotal + " de dano (Base: " + danoBase +
-                    ", Mágico: " + danoMagico + ")");
+                    ", Mágico: " + danoMagico + ")" + RESET);
 
             // 15% de chance de ataque extra por golem
             if (Math.random() < 0.15) {
                 int danoExtra = (int) (danoTotal * 0.3);
                 alvo.receberDano(danoExtra);
-                System.out.println("  → Ataque Extra do Golem: " + danoExtra + " de dano!");
+                System.out.println(AMARELO + "\n  → Ataque Extra do Golem: " + danoExtra + " de dano!" + RESET);
             }
         }
 
@@ -91,8 +93,8 @@ public class Gilgamesh extends Mago {
     // Habilidade defensiva única - Muralha da Babilônia
     public void muralhaDaBabilonia() {
         int defesaExtra = getDefesa() * 2 + (int) (getPontosMagia() * 0.3);
-        System.out.println("Gilgamesh ergue a Muralha da Babilônia, aumentando sua defesa em " +
-                defesaExtra + " pontos!");
+        System.out.println(AMARELO + "\nGilgamesh ergue a Muralha da Babilônia, aumentando sua defesa em " +
+                defesaExtra + " pontos!" + RESET);
 
         // Implementação temporária - precisaria de um mecanismo para defesa temporária
         setDefesa(getDefesa() + defesaExtra);

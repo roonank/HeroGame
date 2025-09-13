@@ -3,7 +3,7 @@ package model.personagens.inimigos.deuses.gregos;
 import model.habilidades.Habilidade;
 import model.habilidades.TipoHabilidade;
 import model.personagens.MagoInimigo;
-
+import static util.Cores.*;
 import java.util.Arrays;
 
 public class Poseidon extends MagoInimigo {
@@ -35,16 +35,16 @@ public class Poseidon extends MagoInimigo {
 
             if (Math.random() < 0.2) {
                 dano = (int) (dano * 1.7);
-                System.out.println("CRÍTICO MARINHO! O inimigo foi atordoado pelas ondas!");
+                System.out.println(AMARELO + "\nCRÍTICO MARINHO! O inimigo foi atordoado pelas ondas!" + RESET);
                 // Aqui seria implementado o efeito de stun se o sistema permitisse
             }
 
             setPontosMagia(getPontosMagia() - habilidade.getCustoMana());
             alvo.receberDano(dano);
-            System.out.println("Poseidon invoca " + habilidade.getNome() +
-                    " com poder dos mares e causa " + dano + " de dano aquático!");
+            System.out.println(AMARELO + "\nPoseidon invoca " + habilidade.getNome() +
+                    " com poder dos mares e causa " + dano + " de dano aquático!" + RESET);
         } else {
-            System.out.println("Poseidon não pode usar esta habilidade!");
+            System.out.println(AMARELO + "\nPoseidon não pode usar esta habilidade!" + RESET);
         }
     }
 
@@ -55,16 +55,16 @@ public class Poseidon extends MagoInimigo {
             setPontosMagia(getPontosMagia() - 15);
             int dano = (int) (getForca() * 2.8 + getPontosMagia() * 0.4);
             alvo.receberDano(dano);
-            System.out.println("Poseidon libera uma Explosão Arcana Marinha causando " +
-                    dano + " de dano devastador das profundezas!");
+            System.out.println(AMARELO + "\nPoseidon libera uma Explosão Arcana Marinha causando " +
+                    dano + " de dano devastador das profundezas!" + RESET);
         } else {
-            System.out.println("Poseidon não tem magia suficiente para esta habilidade!");
+            System.out.println(AMARELO + "\nPoseidon não tem magia suficiente para esta habilidade!" + RESET);
         }
     }
 
     // Habilidade única de Poseidon - Fúria dos Mares
     public void furiaDosMares(model.interfaces.ICombatente alvo) {
-        System.out.println("Poseidon desencadeia a Fúria dos Mares!");
+        System.out.println(AMARELO + "\nPoseidon desencadeia a Fúria dos Mares!" + RESET);
 
         // Ataque em área que causa dano múltiplo baseado na força e mana
         for (int i = 0; i < 2; i++) {
@@ -73,12 +73,12 @@ public class Poseidon extends MagoInimigo {
             int danoTotal = danoBase + danoMarinho;
 
             alvo.receberDano(danoTotal);
-            System.out.println("Onda " + (i + 1) + ": " + danoTotal +
-                    " de dano aquático! (Base: " + danoBase + ", Marinho: " + danoMarinho + ")");
+            System.out.println(AMARELO + "\nOnda " + (i + 1) + ": " + danoTotal +
+                    " de dano aquático! (Base: " + danoBase + ", Marinho: " + danoMarinho + ")" + RESET);
         }
 
         // Reduz a defesa do alvo após o ataque
-        System.out.println("A fúria dos mares enfraquece a defesa do inimigo!");
+        System.out.println(AMARELO + "\nA fúria dos mares enfraquece a defesa do inimigo!" + RESET);
     }
 
     // Metodo especial para Maré Alta
@@ -86,8 +86,8 @@ public class Poseidon extends MagoInimigo {
         int curaMarinha = (int) (getVidaMaxima() * 0.25);
         int manaDasProfundezas = (int) (getPontosMagia() * 0.3);
 
-        System.out.println("Poseidon invoca a Maré Alta, recuperando " +
-                curaMarinha + " de vida e " + manaDasProfundezas + " de magia das profundezas!");
+        System.out.println(AMARELO + "\nPoseidon invoca a Maré Alta, recuperando " +
+                curaMarinha + " de vida e " + manaDasProfundezas + " de magia das profundezas!" + RESET);
 
         curar(curaMarinha);
         setPontosMagia(getPontosMagia() + manaDasProfundezas);
