@@ -32,6 +32,7 @@ public class Jogo {
             default -> jogador = new Aquiles();
         }
     }
+
     //carrega inimigos por mitolgia
     public void carregarInimigos(int mitologia) {
         inimigos.clear();

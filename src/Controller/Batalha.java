@@ -138,10 +138,10 @@ public class Batalha {
             }
 
             case FUGIR -> {
-                int chance = 50;
-                if (random.nextInt(100) < chance) {
+                int chance = random.nextInt(5);
+                if (random.nextInt(10) < chance) {
                     batalhaFinalizada = true;
-                    jogadorVenceu = (atacante == jogador);
+                    jogadorVenceu = (atacante == inimigo);
                     logBatalha.add(VERDE + atacante.getNome() + " fugiu da batalha!" + RESET);
                 } else {
                     logBatalha.add(VERMELHO + atacante.getNome() + " tentou fugir mas falhou!" + RESET);

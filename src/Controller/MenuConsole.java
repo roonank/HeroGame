@@ -3,7 +3,6 @@ package Controller;
 import model.habilidades.Habilidade;
 import model.personagens.Heroi;
 import model.personagens.herois.*;
-import util.Cores;
 
 import java.util.List;
 import java.util.Scanner;
@@ -16,20 +15,26 @@ public class MenuConsole {
     public void iniciar() {
         System.out.println(AZUL + "=== TORRE DOS DEUSES ===" + RESET);
         Jogo jogo = new Jogo();
-        List<Heroi> herois = List.of(
-                new Aquiles(),
-                new Hercules(),
-                new Perseu(),
-                new Ragnar(),
-                new Gilgamesh()
+        /*List<Heroi> herois = List.of(
+                "Aquiles",//new Aquiles(),
+                "Hércules",//new Hercules(),
+                "Perseu",//new Perseu(),
+                "Ragnar",//new Ragnar(),
+                "Gilgamesh"//new Gilgamesh()
+        );*/
+        List<String> herois = List.of(
+                "Aquiles",//new Aquiles(),
+                "Hércules",//new Hercules(),
+                "Perseu",//new Perseu(),
+                "Ragnar",//new Ragnar(),
+                "Gilgamesh"//new Gilgamesh()
         );
         System.out.println(AMARELO + "\nEscolha seu herói:" + RESET);
         for (int i = 0; i < herois.size(); i++) {
-            System.out.println(VERDE + "" + (i + 1) + " - " + herois.get(i).getNome() + RESET);
+            System.out.println(VERDE + "" + (i + 1) + " - " + herois.get(i) + RESET);
         }
-        int escolhaHeroi = lerOpcao(1, herois.size());
-        Heroi heroiEscolhido = herois.get(escolhaHeroi - 1);
-        jogo.setJogador(heroiEscolhido);
+        jogo.escolherHeroi(lerOpcao(1, herois.size()));
+        Heroi heroiEscolhido = jogo.getJogador();
         System.out.println(AMARELO + "\nEscolha a mitologia:" + RESET);
         System.out.println(VERDE + "1 - Egípcia" + RESET);
         System.out.println(VERDE + "2 - Grega" + RESET);
@@ -45,7 +50,6 @@ public class MenuConsole {
             while (!batalha.isBatalhaFinalizada()) {
                 if (batalha.isJogadorNaVez()) {
                     System.out.println("\n" + batalha.getStatusVidaColorido());
-                    //System.out.println(VERDE + "\n--- Vez de " + batalha.getJogador().getNome() + " ---" + RESET);
                     System.out.println(AMARELO + "\nEscolha a ação para " + batalha.getJogador().getNome()  + RESET);
                     System.out.println(VERDE +"1 - Atacar");
                     System.out.println(VERDE +"2 - Usar habilidade");
