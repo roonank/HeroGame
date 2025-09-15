@@ -97,7 +97,10 @@ public class MenuConsole {
             }
 
             System.out.println(VERDE + "\nVitória no andar " + torre.getAndarAtual() + "!" + RESET);
-            distribuirPontos(jogo.getJogador());
+            boolean podeDistribuir = (torre.getAndarAtual() < jogo.getTotalAndares()) && (heroiEscolhido.getPontosDisponiveis() > 0);
+            if (podeDistribuir) {
+                distribuirPontos(jogo.getJogador());
+            }
         }
 
         if (jogo.getJogador().estaVivo())
@@ -105,23 +108,38 @@ public class MenuConsole {
     }
 
     private void distribuirPontos(Heroi heroi) {
-        if (heroi.getPontosDisponiveis() > 0) {
-            System.out.println(AMARELO + "\nVocê tem " + heroi.getPontosDisponiveis() + " pontos para distribuir!" + RESET);
-            System.out.println(VERDE + "1 - Força" + RESET);
-            System.out.println(VERDE + "2 - Defesa" + RESET);
-            System.out.println(VERDE + "3 - Vida" + RESET);
-            System.out.print(AMARELO + "Escolha o atributo: " + RESET);
+        while (heroi.getPontosHabilidade() > 0) {
+            System.out.println("\nPontos disponíveis: " + heroi.getPontosHabilidade());
+            System.out.println("Escolha um atributo para aplicar pontos:");
+            System.out.println("1) Força   2) Defesa   3) Vida Máx (+5)  0) Sair");
 
-            int escolha = lerOpcao(1, 3);
-            System.out.print(AMARELO + "Quantos pontos deseja gastar? " + RESET);
-            int qtd = Integer.parseInt(scanner.nextLine());
-            switch (escolha) {
-                case 1 -> heroi.distribuirPontos("forca", qtd);
-                case 2 -> heroi.distribuirPontos("defesa", qtd);
-                case 3 -> heroi.distribuirPontos("vida", qtd);
+            int op = lerOpcao(0, 3);
+            if (op == 0) break;
+
+            System.out.print("Quantos pontos deseja aplicar? (0 para cancelar)");
+            int max = heroi.getPontosHabilidade();
+            int qtd = lerOpcao(0, max);
+
+            if (!heroi.gastarPontosHabilidade(qtd)) {
+                System.out.println(AMARELO + "Pontos insuficientes." + RESET);
+                continue;
             }
-        }
 
+            switch (op) {
+                case 1 -> heroi.addForca(qtd);
+                case 2 -> heroi.addDefesa(qtd);
+                case 3 -> heroi.addVidaMaxima(5 * qtd);
+            }
+
+            String nomeAttr = switch (op) {
+                case 1 -> "Força";
+                case 2 -> "Defesa";
+                default -> "Vida Máxima";
+            };
+
+            System.out.printf(VERDE + "Aplicados %d ponto(s) em %s. Restam: %d%n" + RESET, qtd, nomeAttr, heroi.getPontosHabilidade());
+        }
+        if (heroi.getPontosHabilidade() == 0) System.out.println("Sem pontos para distribuir.");
     }
 
     private int lerOpcao(int min, int max) {

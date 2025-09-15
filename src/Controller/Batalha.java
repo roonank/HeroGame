@@ -1,8 +1,12 @@
 package Controller;
 
+import model.habilidades.TipoEfeito;
+import model.habilidades.TipoHabilidade;
 import model.interfaces.ICombatente;
 import model.interfaces.IHabilidade;
 import static util.Cores.*;
+
+import model.personagens.Heroi;
 import model.personagens.Personagem;
 import model.habilidades.Habilidade;
 
@@ -17,18 +21,35 @@ public class Batalha {
     private boolean jogadorVenceu;
     private List<String> logBatalha;
     private boolean jogadorNaVez;
+    private final boolean premiaAoVencer;
+
+    private static final Habilidade ATAQUE_BASICO =
+        new Habilidade("Ataque Básico", "Um ataque simples.",
+                0,     // custoMana
+                0,     // danoBase
+                1.0,   // multiplicador = usa a força 1x
+                TipoEfeito.DANO,
+                TipoHabilidade.FISICO,
+                0,     // cooldown
+                0.90,  // chance de acerto (90%)
+                0.10   // chance de crítico (10%)
+        );
 
     public enum AcaoBatalha {
         ATACAR, USAR_HABILIDADE, DEFENDER, FUGIR
     }
 
-    public Batalha(ICombatente jogador, ICombatente inimigo) {
+    public Batalha(ICombatente jogador, ICombatente inimigo, boolean premiaAoVencer) {
         this.jogador = jogador;
         this.inimigo = inimigo;
+        this.premiaAoVencer = premiaAoVencer;
         this.random = new Random();
         this.batalhaFinalizada = false;
         this.logBatalha = new java.util.ArrayList<>();
         this.jogadorNaVez = true;
+
+        if (jogador instanceof Personagem pj) pj.resetarMana();
+        if (inimigo instanceof Personagem pi) pi.resetarMana();
     }
 
     public void executarTurno(AcaoBatalha acaoJogador, Habilidade habilidade) {
@@ -42,7 +63,7 @@ public class Batalha {
             executarAcaoComLog(inimigo, jogador, escolherAcaoInimigo(), null);
         }
 
-        if (!jogador.estaVivo()) finalizarBatalha(false);
+        if (!jogador.estaVivo()) finalizarBatalha(false );
         else if (!inimigo.estaVivo()) finalizarBatalha(true);
 
         jogadorNaVez = !jogadorNaVez; // Troca o turno
@@ -51,32 +72,71 @@ public class Batalha {
     private void executarAcaoComLog(ICombatente atacante, ICombatente defensor, AcaoBatalha acao, Habilidade habilidade) {
         switch (acao) {
             case ATACAR -> {
-                int dano = atacante.calcularAtaque();
-                dano = Math.max(0, dano - defensor.calcularDefesa());
-
-                if (random.nextDouble() < 0.2) {
-                    dano = (int) (dano * 1.5);
-                    logBatalha.add(ROXO + atacante.getNome() + " desferiu um GOLPE CRÍTICO!" + RESET);
+                if (!(atacante instanceof Personagem atk) || !(defensor instanceof Personagem def)) {
+                    logBatalha.add(VERMELHO + "Alvo/atacante inválido para ataque básico." + RESET);
+                    return;
                 }
 
-                defensor.receberDano(dano);
-                logBatalha.add(VERMELHO + atacante.getNome() + " atacou " + defensor.getNome() + " causando " + dano + " de dano!" + RESET);
+                // Dano do ataque básico também passa pelo mesmo pipeline:
+                var r = calculadora.CalculoDano.calcularDetalhado(atk, def, ATAQUE_BASICO);
+                if (!r.acertou) {
+                    logBatalha.add(AMARELO + atk.getNome() + " tentou atacar mas ERROU (" +
+                            Math.round(r.chanceAcertoUsada * 100) + "%)." + RESET);
+                    return;
+                }
+                int aplicado = def.receberDano(r.dano); // se receberDano for void, apenas chame e use r.dano
+                if (r.critico) logBatalha.add(ROXO + "CRÍTICO x" + String.format("%.2f", r.multiplicadorCritico) + "!" + RESET);
+                logBatalha.add(VERMELHO + atk.getNome() + " atacou " + def.getNome() + " causando " +
+                        (aplicado > 0 ? aplicado : r.dano) + " de dano!" + RESET);
             }
+
             case DEFENDER -> {
                 if (atacante instanceof Personagem p) {
                     p.defender();
-                    logBatalha.add(AMARELO + atacante.getNome() + " assumiu postura defensiva!" + RESET);
+                    // opcional: recompensa de mana
+                    p.recuperarMana(10);
+                    logBatalha.add(AMARELO + p.getNome() + " assumiu postura defensiva e recuperou 10 de mana!" + RESET);
                 }
             }
+
             case USAR_HABILIDADE -> {
-                if (atacante instanceof IHabilidade h && habilidade != null && h.podeUsarHabilidade(habilidade)) {
-                    h.usarHabilidade(habilidade, defensor);
-                    logBatalha.add(CIANO + atacante.getNome() + " usou " + habilidade.getNome() + "!" + RESET);
-                } else {
+                if (!(atacante instanceof Personagem atk) || !(defensor instanceof Personagem def)
+                        || !(atacante instanceof IHabilidade h) || habilidade == null
+                        || !h.podeUsarHabilidade(habilidade)) {
+
                     logBatalha.add(VERMELHO + atacante.getNome() + " não conseguiu usar a habilidade! Atacando normalmente." + RESET);
                     executarAcaoComLog(atacante, defensor, AcaoBatalha.ATACAR, null);
+                    return;
                 }
+
+                // **MANA**: checa e consome aqui (assumindo getters em Personagem)
+                int custo = habilidade.getCustoMana();
+                if (!atk.temMana(custo)) {
+                    logBatalha.add(AMARELO + atk.getNome() + " não tem mana suficiente (" +
+                            atk.getManaAtual() + "/" + atk.getManaMaxima() + "). " +
+                            "Habilidade '" + habilidade.getNome() + "' custa " + custo + ". " + RESET +
+                            "Atacando normalmente.");
+                    executarAcaoComLog(atacante, defensor, AcaoBatalha.ATACAR, null);
+                    return;
+                }
+                atk.gastarMana(custo);
+
+                var r = calculadora.CalculoDano.calcularDetalhado(atk, def, habilidade);
+                if (!r.acertou) {
+                    logBatalha.add(AMARELO + atk.getNome() + " usa " + habilidade.getNome() +
+                            " mas ERRA (" + Math.round(r.chanceAcertoUsada * 100) + "%). " +
+                            "Mana: " + atk.getManaAtual() + "/" + atk.getManaMaxima() + RESET);
+                    return;
+                }
+
+                int aplicado = def.receberDano(r.dano); // se for void, use r.dano
+                if (r.critico) logBatalha.add(ROXO + "CRÍTICO x" + String.format("%.2f", r.multiplicadorCritico) + "!" + RESET);
+
+                logBatalha.add(CIANO + atk.getNome() + " usou " + habilidade.getNome() + " e causou " +
+                        (aplicado > 0 ? aplicado : r.dano) + " de dano! " +
+                        AZUL + "(Mana: " + atk.getManaAtual() + "/" + atk.getManaMaxima() + ")" + RESET);
             }
+
             case FUGIR -> {
                 int chance = 50;
                 if (random.nextInt(100) < chance) {
@@ -90,6 +150,7 @@ public class Batalha {
         }
     }
 
+
     private AcaoBatalha escolherAcaoInimigo() {
         return random.nextInt(100) < 70 ?
                 AcaoBatalha.ATACAR : AcaoBatalha.DEFENDER;
@@ -98,8 +159,13 @@ public class Batalha {
     private void finalizarBatalha(boolean vitoria) {
         batalhaFinalizada = true;
         jogadorVenceu = vitoria;
-        if (vitoria) logBatalha.add(VERDE + "Vitória!" + RESET);
-        else logBatalha.add(VERMELHO + "Derrota..." + RESET);
+        if (vitoria) {
+            if (premiaAoVencer && jogador instanceof Heroi h) {
+                h.adicionarPontosHabilidade(10);
+                logBatalha.add(VERDE + "+10 pontos de habilidade!" + RESET);
+            }
+            logBatalha.add(VERDE + "Vitória!" + RESET);
+        } else logBatalha.add(VERMELHO + "Derrota..." + RESET);
     }
 
     public String getStatusVida() {

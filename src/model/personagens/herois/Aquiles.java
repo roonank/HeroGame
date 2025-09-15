@@ -42,6 +42,14 @@ public class Aquiles extends Guerreiro {
             return;
         }
 
+        int custo = habilidade.getCustoMana();
+        if (!temMana(custo)){
+            System.out.printf(AMARELO + "\nMana insuficiente! (%d/%d) - %s custa %d." + RESET + getManaAtual(), getManaMaxima(), habilidade.getNome(), custo);
+            return;
+        }
+
+        gastarMana(custo);
+
         Personagem defensor = (Personagem) alvo;
 
         calculadora.ResultadoAtaque r = calculadora.CalculoDano.calcularDetalhado(this, defensor, habilidade);

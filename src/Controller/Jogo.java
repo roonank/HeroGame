@@ -55,7 +55,8 @@ public class Jogo {
         if (andarAtual >= inimigos.size()) return null;
         Inimigo inimigo = inimigos.get(andarAtual);
         andarAtual++;
-        return new Batalha(jogador, inimigo);
+        boolean eUltimoAndar = (andarAtual == getTotalAndares());
+        return new Batalha(jogador, inimigo, !eUltimoAndar);
     }
 
     public Heroi getJogador() {

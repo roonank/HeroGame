@@ -15,6 +15,9 @@ public abstract class Personagem implements ICombatente, IHabilidade {
     protected int defesa;
     protected List<Habilidade> habilidades;
     protected boolean defendendo;
+    protected int manaMaxima = 150;
+    protected int manaAtual = 150;
+    protected int pontosHabilidade = 0;
 
     public Personagem(String nome, int pontosVida, int forca, int defesa) {
         this.nome = nome;
@@ -24,6 +27,69 @@ public abstract class Personagem implements ICombatente, IHabilidade {
         this.defesa = defesa;
         this.habilidades = new ArrayList<>();
         this.defendendo = false;
+    }
+
+    public int getPontosHabilidade() {
+        return pontosHabilidade;
+    }
+
+    public void adicionarPontosHabilidade(int qtd) {
+        if (qtd > 0) pontosHabilidade += qtd;
+    }
+
+    public boolean gastarPontosHabilidade(int qtd) {
+        if (qtd <= 0) return false;
+        if (pontosHabilidade < qtd) return false;
+        pontosHabilidade -= qtd;
+        return true;
+    }
+
+    public void addForca(int v) { this.forca += Math.max(0, v); }
+    public void addDefesa(int v) { this.defesa += Math.max(0, v); }
+    public void addVidaMaxima(int v) {
+        if (v <= 0) return;
+        this.pontosVidaMaximos += v;
+        this.pontosVida = Math.min(pontosVidaMaximos, pontosVida + v); // “cura” proporcional
+    }
+
+    public void setHabilidades(List<Habilidade> habilidades) {
+        this.habilidades = habilidades;
+    }
+    public int getManaMaxima() {
+        return manaMaxima;
+    }
+    public void setManaMaxima(int manaMaxima) {
+        this.manaMaxima = Math.max(0, manaMaxima);
+        this.manaAtual  = Math.min(this.manaAtual, this.manaMaxima);
+    }
+    public int getManaAtual() {
+        return manaAtual;
+    }
+    public void setManaAtual(int manaAtual) {
+        this.manaAtual = manaAtual;
+    }
+
+
+    public void resetarMana() {
+        this.manaAtual = this.manaMaxima; // começa batalha com 100
+    }
+
+    public boolean temMana(int custo) {
+        return custo <= manaAtual;
+    }
+
+    public boolean gastarMana(int custo) {
+        if (custo < 0) custo = 0;
+        if (manaAtual >= custo) {
+            manaAtual -= custo;
+            return true;
+        }
+        return false;
+    }
+
+    public void recuperarMana(int quantidade) {
+        if (quantidade <= 0) return;
+        manaAtual = Math.min(manaMaxima, manaAtual + quantidade);
     }
 
     @Override
