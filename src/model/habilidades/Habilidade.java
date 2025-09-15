@@ -1,5 +1,7 @@
 package model.habilidades;
 
+import model.personagens.Personagem;
+
 public class Habilidade {
     private String nome;
     private String descricao;
@@ -11,10 +13,9 @@ public class Habilidade {
     private int duracao;
     private double chanceAcerto;
     private double chanceCritico;
-    private boolean ultimate;
 
     public Habilidade(String nome, String descricao, int custoMana, int danoBase, double multiplicador, TipoEfeito tipoEfeito,
-                      TipoHabilidade tipo, int duracao, double chanceAcerto, double chanceCritico, boolean ultimate) {
+                      TipoHabilidade tipo, int duracao, double chanceAcerto, double chanceCritico) {
         this.nome = nome;
         this.descricao = descricao;
         this.custoMana = custoMana;
@@ -25,7 +26,15 @@ public class Habilidade {
         this.duracao = duracao;
         this.chanceAcerto = chanceAcerto;
         this.chanceCritico = chanceCritico;
-        this.ultimate = ultimate;
+    }
+
+    public Habilidade(String nome, TipoHabilidade tipo, int custoMana, int danoBase, double multiplicador, TipoEfeito tipoEfeito) {
+        this.nome = nome;
+        this.tipo = tipo;
+        this.custoMana = custoMana;
+        this.danoBase = danoBase;
+        this.multiplicador = multiplicador;
+        this.tipoEfeito = tipoEfeito;
     }
 
     public boolean acertou() {
@@ -33,13 +42,13 @@ public class Habilidade {
     }
 
     // Getters
+    public int getDanoBase() { return danoBase; }
+    public double getMultiplicador() { return multiplicador; }
+    public double getChanceAcerto() { return chanceAcerto; }
+    public double getChanceCritico() { return chanceCritico; }
     public String getNome() { return nome; }
-    public String getDescricao() { return descricao; }
     public int getCustoMana() { return custoMana; }
     public TipoHabilidade getTipo() {
         return tipo;
     }
-    public TipoEfeito getTipoEfeito() { return tipoEfeito; }
-    public int getDuracao() { return duracao; }
-    public boolean isUltimate() { return ultimate; }
 }

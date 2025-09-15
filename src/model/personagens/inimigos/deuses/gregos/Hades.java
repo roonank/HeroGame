@@ -1,9 +1,13 @@
 package model.personagens.inimigos.deuses.gregos;
 
+import calculadora.CalculoDano;
 import model.habilidades.Habilidade;
+import model.habilidades.TipoEfeito;
 import model.habilidades.TipoHabilidade;
 import model.interfaces.ICombatente;
 import model.personagens.GuerreiroInimigo;
+import model.personagens.Personagem;
+
 import static util.Cores.*;
 import java.util.Arrays;
 
@@ -13,11 +17,11 @@ public class Hades extends GuerreiroInimigo {
         super("Hades", 100, 16, 12,
                 Arrays.asList(
                         new Habilidade("Lâmina das Sombras", TipoHabilidade.FISICO,
-                                32, 2, 0.9, false), // 16 * 2
+                                32, 2, 0.9, TipoEfeito.DANO), // 16 * 2
                         new Habilidade("Toque da Morte", TipoHabilidade.FISICO,
-                                40, 3, 0.85, false), // 16 * 2.5
+                                40, 3, 0.85, TipoEfeito.DANO), // 16 * 2.5
                         new Habilidade("Punho do Submundo", TipoHabilidade.FISICO,
-                                48, 4, 0.75, false) // 16 * 3
+                                48, 4, 0.75, TipoEfeito.DANO) // 16 * 3
                 ));
     }
 
@@ -30,8 +34,9 @@ public class Hades extends GuerreiroInimigo {
     @Override
     public void usarHabilidade(Habilidade habilidade, ICombatente alvo) {
         if (podeUsarHabilidade(habilidade)) {
+            Personagem defensor = (Personagem) alvo;
             //tem 20% de chance de dano crítico
-            int dano = habilidade.calcularDano(getForca());
+            int dano = CalculoDano.calcularDano(this, defensor, habilidade);
             if (Math.random() < 0.2) {
                 dano = (int) (dano * 1.5);
                 System.out.println(AMARELO + "\nDANO CRÍTICO!" + RESET);

@@ -1,8 +1,12 @@
 package model.personagens.inimigos.deuses.gregos;
 
+import calculadora.CalculoDano;
 import model.habilidades.Habilidade;
+import model.habilidades.TipoEfeito;
 import model.habilidades.TipoHabilidade;
 import model.personagens.MagoInimigo;
+import model.personagens.Personagem;
+
 import static util.Cores.*;
 import java.util.Arrays;
 
@@ -12,11 +16,11 @@ public class Atena extends MagoInimigo {
         super("Atena", 100, 10, 7, 100, // Menos vida e defesa, mas mais mana que Ragnar
                 Arrays.asList(
                         new Habilidade("Sabedoria Divina", TipoHabilidade.MAGICO,
-                                25, 3, 0.95, false), // 10 * 2.5
+                                25, 3, 0.95, TipoEfeito.DANO), // 10 * 2.5
                         new Habilidade("Lança da Vitória", TipoHabilidade.MAGICO,
-                                30, 4, 0.9, false), // 10 * 3
+                                30, 4, 0.9, TipoEfeito.DANO), // 10 * 3
                         new Habilidade("Escudo de Égide", TipoHabilidade.MAGICO,
-                                35, 5, 0.85, false) // 10 * 3.5
+                                35, 5, 0.85, TipoEfeito.DANO) // 10 * 3.5
                 ));
     }
 
@@ -30,8 +34,9 @@ public class Atena extends MagoInimigo {
     @Override
     public void usarHabilidade(Habilidade habilidade, model.interfaces.ICombatente alvo) {
         if (podeUsarHabilidade(habilidade)) {
+            Personagem defensor = (Personagem) alvo;
             // Atena tem 25% de chance de crítico mágico (mais que Ragnar)
-            int dano = habilidade.calcularDano(getForca());
+            int dano = CalculoDano.calcularDano(this, defensor, habilidade);
 
             if (Math.random() < 0.25) {
                 dano = (int) (dano * 1.6);

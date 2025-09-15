@@ -1,9 +1,13 @@
 package model.personagens.inimigos.deuses.gregos;
 
+import calculadora.CalculoDano;
 import model.habilidades.Habilidade;
+import model.habilidades.TipoEfeito;
 import model.habilidades.TipoHabilidade;
 import model.interfaces.ICombatente;
 import model.personagens.MagoInimigo;
+import model.personagens.Personagem;
+
 import static util.Cores.*;
 import java.util.Arrays;
 
@@ -13,11 +17,11 @@ public class Zeus extends MagoInimigo {
         super("Zeus", 100, 10, 8, 100,
                 Arrays.asList(
                         new Habilidade("Sabedoria Suprema", TipoHabilidade.MAGICO,
-                                25, 3, 0.95, false),
+                                25, 3, 0.95, TipoEfeito.DANO),
                         new Habilidade("Chama Destruidora", TipoHabilidade.MAGICO,
-                                40, 4, 0.99, false),
+                                40, 4, 0.99, TipoEfeito.DANO),
                         new Habilidade("Desolação Divina", TipoHabilidade.MAGICO,
-                                35, 5, 0.85, false)
+                                35, 5, 0.85, TipoEfeito.DANO)
                 ));
     }
 
@@ -31,8 +35,9 @@ public class Zeus extends MagoInimigo {
     @Override
     public void usarHabilidade(Habilidade habilidade, model.interfaces.ICombatente alvo) {
         if (podeUsarHabilidade(habilidade)) {
+            Personagem defensor = (Personagem) alvo;
             // Zeus tem 25% de chance de crítico mágico (mais que Ragnar)
-            int dano = habilidade.calcularDano(getForca());
+            int dano = CalculoDano.calcularDano(this, defensor, habilidade);
 
             if (Math.random() < 0.25) {
                 dano = (int) (dano * 1.6);

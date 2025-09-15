@@ -84,19 +84,19 @@ public abstract class Personagem implements ICombatente, IHabilidade {
     }
 
     // Getters para subclasses
-    protected int getForca() {
+    public int getForca() {
         return forca;
     }
 
-    protected int getDefesa() {
+    public int getDefesa() {
         return defesa;
     }
 
-    protected void setForca(int forca) {
+    public void setForca(int forca) {
         this.forca = forca;
     }
 
-    protected void setDefesa(int defesa) {
+    public void setDefesa(int defesa) {
         this.defesa = defesa;
     }
 }

@@ -1,8 +1,12 @@
 package model.personagens.inimigos.deuses.gregos;
 
+import calculadora.CalculoDano;
 import model.habilidades.Habilidade;
+import model.habilidades.TipoEfeito;
 import model.habilidades.TipoHabilidade;
 import model.personagens.MagoInimigo;
+import model.personagens.Personagem;
+
 import static util.Cores.*;
 import java.util.Arrays;
 
@@ -12,11 +16,11 @@ public class Poseidon extends MagoInimigo {
         super("Poseidon", 100, 12, 8, 90, // Mais vida e força que Atena, menos mana
                 Arrays.asList(
                         new Habilidade("Tridente dos Mares", TipoHabilidade.MAGICO,
-                                30, 4, 0.9, false), // 12 * 2.5
+                                30, 4, 0.9, TipoEfeito.DANO), // 12 * 2.5
                         new Habilidade("Tsunami Devastador", TipoHabilidade.MAGICO,
-                                36, 5, 0.85, false), // 12 * 3
+                                36, 5, 0.85, TipoEfeito.DANO), // 12 * 3
                         new Habilidade("Fúria dos Oceanos", TipoHabilidade.MAGICO,
-                                42, 6, 0.8, false) // 12 * 3.5
+                                42, 6, 0.8, TipoEfeito.DANO) // 12 * 3.5
                 ));
     }
 
@@ -30,8 +34,9 @@ public class Poseidon extends MagoInimigo {
     @Override
     public void usarHabilidade(Habilidade habilidade, model.interfaces.ICombatente alvo) {
         if (podeUsarHabilidade(habilidade)) {
+            Personagem defensor = (Personagem) alvo;
             // Poseidon tem 20% de chance de crítico mágico com stun
-            int dano = habilidade.calcularDano(getForca());
+            int dano = CalculoDano.calcularDano(this, defensor, habilidade);
 
             if (Math.random() < 0.2) {
                 dano = (int) (dano * 1.7);

@@ -1,5 +1,6 @@
 package model.personagens;
 
+import calculadora.CalculoDano;
 import model.habilidades.Habilidade;
 import model.habilidades.TipoHabilidade;
 
@@ -36,14 +37,22 @@ public class GuerreiroInimigo extends Inimigo {
 
     @Override
     public void usarHabilidade(Habilidade habilidade, model.interfaces.ICombatente alvo) {
-        if (podeUsarHabilidade(habilidade)) {
-            int dano = habilidade.calcularDano(getForca());
-            alvo.receberDano(dano);
-            System.out.println(getNome() + " usa " + habilidade.getNome() +
-                    " e causa " + dano + " de dano!");
-        } else {
+        if (habilidade == null) {
             System.out.println(getNome() + " não pode usar esta habilidade!");
+            return;
         }
+
+        if (!(alvo instanceof Personagem)) {
+            System.out.println(getNome() + " não pode atingir este alvo com " + habilidade.getNome() + ".");
+            return;
+        }
+
+        Personagem defensor = (Personagem) alvo;
+
+        int dano = CalculoDano.calcularDano(this, defensor, habilidade);
+        alvo.receberDano(dano);
+
+        System.out.println(getNome() + " usa " + habilidade.getNome() + " e causa " + dano + " de dano!");
     }
 
     //Habilidade única do guerreiro

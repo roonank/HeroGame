@@ -1,8 +1,12 @@
 package model.personagens.inimigos.deuses.gregos;
 
+import calculadora.CalculoDano;
 import model.habilidades.Habilidade;
+import model.habilidades.TipoEfeito;
 import model.habilidades.TipoHabilidade;
 import model.personagens.GuerreiroInimigo;
+import model.personagens.Personagem;
+
 import static util.Cores.*;
 import java.util.Arrays;
 
@@ -12,11 +16,11 @@ public class Ares extends GuerreiroInimigo {
         super("Ares", 100, 20, 8,
                 Arrays.asList(
                         new Habilidade("Lança da Discórdia", TipoHabilidade.FISICO,
-                                40, 2, 0.85, false), // 20 * 2
+                                40, 2, 0.85, TipoEfeito.DANO), // 20 * 2
                         new Habilidade("Golpe da Guerra", TipoHabilidade.FISICO,
-                                50, 3, 0.8, false), // 20 * 2.5
+                                50, 3, 0.8, TipoEfeito.DANO), // 20 * 2.5
                         new Habilidade("Fúria Belicosa", TipoHabilidade.FISICO,
-                                60, 4, 0.7, false) // 20 * 3
+                                60, 4, 0.7, TipoEfeito.DANO) // 20 * 3
                 ));
     }
 
@@ -29,8 +33,9 @@ public class Ares extends GuerreiroInimigo {
     @Override
     public void usarHabilidade(Habilidade habilidade, model.interfaces.ICombatente alvo) {
         if (podeUsarHabilidade(habilidade)) {
+            Personagem defensor = (Personagem) alvo;
             // Ares tem 25% de chance de dano crítico
-            int dano = habilidade.calcularDano(getForca());
+            int dano = CalculoDano.calcularDano(this, defensor, habilidade);
             if (Math.random() < 0.25) {
                 dano = (int) (dano * 1.8); // Multiplicador maior
                 System.out.println(AMARELO + "\nFÚRIA GUERREIRA! DANO CRÍTICO!" + RESET);
