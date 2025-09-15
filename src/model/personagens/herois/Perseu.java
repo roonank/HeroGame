@@ -58,13 +58,4 @@ public class Perseu extends Guerreiro {
         int danoAplicado = defensor.receberDano(r.dano);
         System.out.printf(AMARELO + "%n%s executa %s e causa %d de dano! " + RESET, getNome(), habilidade.getNome(), danoAplicado);
     }
-
-//    // Sobrescreve o método do guerreiro com versão mais ágil
-//    @Override
-//    public void investidaFuriosa(model.interfaces.ICombatente alvo) {
-//        int danoBase = getForca() + getDefesa(); // Usa força + defesa para representar agilidade
-//        alvo.receberDano(danoBase);
-//        System.out.println(AMARELO + "\nPerseu executa uma Investida Ágil causando " +
-//                danoBase + " de dano preciso!" + RESET);
-//    }
 }

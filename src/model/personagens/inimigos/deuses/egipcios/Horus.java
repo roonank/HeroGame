@@ -58,17 +58,4 @@ public class Horus extends GuerreiroInimigo {
         int danoAplicado = defensor.receberDano(r.dano);
         System.out.printf(AMARELO + "%n%s executa %s e causa %d de dano! " + RESET, getNome(), habilidade.getNome(), danoAplicado);
     }
-
-//    // Sobrescreve o metodo do guerreiro com versão mais agressiva
-//    @Override
-//    public void investidaFuriosa(model.interfaces.ICombatente alvo) {
-//        int danoExtra = (int) (getForca() * 2.5);
-//        alvo.receberDano(danoExtra);
-//        System.out.println(AMARELO + "\nHorus executa uma Investida Sangrenta causando " +
-//                danoExtra + " de dano devastador!" + RESET);
-//
-//        // Horus ganha um bônus de força após a investida
-//        setForca(getForca() + 2);
-//        System.out.println(AMARELO + "\nHorus fica mais furioso! Força aumentada!" + RESET);
-//    }
 }

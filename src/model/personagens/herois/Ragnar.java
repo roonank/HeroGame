@@ -58,19 +58,4 @@ public class Ragnar extends Mago {
         int danoAplicado = defensor.receberDano(r.dano);
         System.out.printf(AMARELO + "%n%s executa %s e causa %d de dano! " + RESET, getNome(), habilidade.getNome(), danoAplicado);
     }
-
-//    // Sobrescreve o metodo do mago com versão mais poderosa
-//    @Override
-//    public void explosaoArcana(model.interfaces.ICombatente alvo) {
-//        if (getPontosMagia() >= 15) {
-//            setPontosMagia(getPontosMagia() - 15);
-//            int dano = (int) (getForca() * 2.5 + getPontosMagia() * 0.5);
-//            alvo.receberDano(dano);
-//            System.out.println(AMARELO + "\nRagnar libera uma Explosão Arcana Nórdica causando " +
-//                    dano + " de dano devastador!" + RESET);
-//        } else {
-//            System.out.println(AMARELO + "\nRagnar não tem magia suficiente para esta habilidade!" + RESET);
-//        }
-//    }
-
 }

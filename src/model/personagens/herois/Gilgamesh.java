@@ -60,18 +60,4 @@ public class Gilgamesh extends Mago {
         int danoAplicado = defensor.receberDano(r.dano);
         System.out.printf(AMARELO + "%n%s executa %s e causa %d de dano! " + RESET, getNome(), habilidade.getNome(), danoAplicado);
     }
-
-//    // Sobrescreve o metodo do mago com versão real
-//    @Override
-//    public void explosaoArcana(model.interfaces.ICombatente alvo) {
-//        if (getPontosMagia() >= 20) {
-//            setPontosMagia(getPontosMagia() - 20);
-//            int dano = (int) (getForca() * 3.0 + getPontosMagia() * 0.4);
-//            alvo.receberDano(dano);
-//            System.out.println(AMARELO + "\nGilgamesh libera uma Explosão da realeza causando " +
-//                    dano + " de dano imperial!" + RESET);
-//        } else {
-//            System.out.println(AMARELO + "\nGilgamesh não tem magia suficiente para esta habilidade!" + RESET);
-//        }
-//    }
 }

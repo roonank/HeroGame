@@ -60,20 +60,4 @@ public class Zeus extends MagoInimigo {
         int danoAplicado = defensor.receberDano(r.dano);
         System.out.printf(AMARELO + "%n%s executa %s e causa %d de dano! " + RESET, getNome(), habilidade.getNome(), danoAplicado);
     }
-
-    // Sobrescreve o metodo do mago com versão divina
-//    @Override
-//    public void explosaoArcana(ICombatente alvo) {
-//        if (getPontosMagia() >= 12) {
-//            setPontosMagia(getPontosMagia() - 12);
-//            int dano = (int) (getForca() * 2.3 + getPontosMagia() * 0.8);
-//            alvo.receberDano(dano);
-//            System.out.println(AMARELO + "\nZeus libera uma Explosão Arcana Divina causando " +
-//                    dano + " de dano celestial!" + RESET);
-//        } else {
-//            System.out.println(AMARELO + "\nZeus não tem magia suficiente para esta habilidade!" + RESET);
-//        }
-//    }
-
-
 }

@@ -59,15 +59,4 @@ public class Hades extends GuerreiroInimigo {
         int danoAplicado = defensor.receberDano(r.dano);
         System.out.printf(AMARELO + "%n%s executa %s e causa %d de dano! " + RESET, getNome(), habilidade.getNome(), danoAplicado);
     }
-
-    // Sobrescreve o metodo do guerreiro com versão sombria
-//    @Override
-//    public void investidaFuriosa(ICombatente alvo) {
-//        int danoExtra = (int) (getForca() * 2.2); // Mais poderoso que um guerreiro comum
-//        alvo.receberDano(danoExtra);
-//        System.out.println(AMARELO + "\nHades executa uma Investida das Trevas causando " +
-//                danoExtra + " de dano e enfraquecendo o alvo!" + RESET);
-//
-//        // Lógica para aplicar enfraquecimento seria implementada aqui
-//    }
 }

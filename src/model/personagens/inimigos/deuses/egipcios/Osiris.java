@@ -59,19 +59,4 @@ public class Osiris extends MagoInimigo {
         int danoAplicado = defensor.receberDano(r.dano);
         System.out.printf(AMARELO + "%n%s executa %s e causa %d de dano! " + RESET, getNome(), habilidade.getNome(), danoAplicado);
     }
-
-    // Sobrescreve o metodo do mago com versão marinha
-//    @Override
-//    public void explosaoArcana(model.interfaces.ICombatente alvo) {
-//        if (getPontosMagia() >= 15) {
-//            setPontosMagia(getPontosMagia() - 15);
-//            int dano = (int) (getForca() * 2.8 + getPontosMagia() * 0.4);
-//            alvo.receberDano(dano);
-//            System.out.println(AMARELO + "\nOsiris libera uma Explosão Arcana Marinha causando " +
-//                    dano + " de dano devastador das profundezas!" + RESET);
-//        } else {
-//            System.out.println(AMARELO + "\nOsiris não tem magia suficiente para esta habilidade!" + RESET);
-//        }
-//    }
-
 }
