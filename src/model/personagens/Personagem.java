@@ -47,10 +47,17 @@ public abstract class Personagem implements ICombatente, IHabilidade {
     }
 
     @Override
-    public void receberDano(int dano) {
-        int danoFinal = Math.max(0, dano - (defendendo ? defesa * 2 : 0));
-        pontosVida = Math.max(0, pontosVida - danoFinal);
-        defendendo = false; // Reset defesa após receber dano
+    public int receberDano(int dano) {
+        int aplicado = dano;
+
+        if (defendendo) {
+            // Ex.: bloqueia 60% do dano (ajuste como quiser)
+            aplicado = (int) Math.ceil(dano * 0.40);
+            defendendo = false; // consome a postura
+        }
+
+        pontosVida = Math.max(0, pontosVida - aplicado);
+        return aplicado;
     }
 
     @Override

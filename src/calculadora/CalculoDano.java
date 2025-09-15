@@ -4,32 +4,47 @@ import model.habilidades.Habilidade;
 import model.personagens.Personagem;
 
 public class CalculoDano {
-    private static final int DEFESA_BASE_CURVA = 100;
+    private static final double DEFESA_BASE_CURVA = 100.0;
+    private static final boolean DEBUG = false; // ligue se quiser ver números
 
     private CalculoDano() {}
 
     public static int calcularDano(Personagem atacante, Personagem defensor, Habilidade habilidade) {
-        if (Math.random() >= habilidade.getChanceAcerto()) {
-            return 0;
+        return calcularDetalhado(atacante, defensor, habilidade).dano;
+    }
+
+    public static ResultadoAtaque calcularDetalhado(Personagem atacante, Personagem defensor, Habilidade habilidade) {
+        double chanceAcertoConfig = habilidade.getChanceAcerto();
+        double chanceAcertoUsada = (chanceAcertoConfig >= 0.0 && chanceAcertoConfig <= 1.0)
+                ? chanceAcertoConfig
+                : (0.70 + Math.random() * 0.30);
+
+        boolean acertou = Math.random() < chanceAcertoUsada;
+        if (!acertou) {
+            return new ResultadoAtaque(false, false, 0, 1.0, chanceAcertoUsada,
+                    habilidade.getChanceCritico(), 0.0, 0.0);
         }
 
         double danoBruto = habilidade.getDanoBase() + (atacante.getForca() * habilidade.getMultiplicador());
-
         if (danoBruto < 0) danoBruto = 0;
 
-        boolean critico = Math.random() < habilidade.getChanceCritico();
+        double chanceCriticoUsada = habilidade.getChanceCritico(); // mantenha 0..1 nas habilidades
+        boolean critico = Math.random() < chanceCriticoUsada;
+        double multCritico = 1.0;
         if (critico) {
-            double multiplicadorCritico = 1.0 + (Math.random());
-            danoBruto *= multiplicadorCritico;
+            multCritico = 1.0 + Math.random(); // [1.0, 2.0)
+            danoBruto *= multCritico;
         }
 
-        int defesaAlvo = defensor.getDefesa();
-        double fatorReducao = (double) DEFESA_BASE_CURVA / (DEFESA_BASE_CURVA + Math.max(0, defesaAlvo));
+        int defesaAlvo = Math.max(0, defensor.getDefesa());
+        double fatorReducao = DEFESA_BASE_CURVA / (DEFESA_BASE_CURVA + defesaAlvo);
         double danoPosDefesa = danoBruto * fatorReducao;
 
         int danoFinal = (int) Math.round(danoPosDefesa);
         if (danoFinal < 1) danoFinal = 1;
 
-        return danoFinal;
+
+        return new ResultadoAtaque(true, critico, danoFinal, multCritico, chanceAcertoUsada,
+                chanceCriticoUsada, danoBruto / multCritico, fatorReducao);
     }
 }

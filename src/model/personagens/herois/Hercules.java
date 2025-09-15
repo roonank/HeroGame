@@ -1,8 +1,12 @@
 package model.personagens.herois;
 
+import calculadora.CalculoDano;
 import model.habilidades.Habilidade;
+import model.habilidades.TipoEfeito;
 import model.habilidades.TipoHabilidade;
 import model.personagens.Guerreiro;
+import model.personagens.Personagem;
+
 import static util.Cores.*;
 
 import java.util.Arrays;
@@ -13,11 +17,11 @@ public class Hercules extends Guerreiro {
         super("Hércules", 100, 18, 10,
                 Arrays.asList(
                         new Habilidade("Golpe Poderoso", TipoHabilidade.FISICO,
-                                36, 2, 0.9, false), // 18 * 2
+                                36, 2, 0.9, TipoEfeito.DANO), // 18 * 2
                         new Habilidade("Força de Titã", TipoHabilidade.FISICO,
-                                45, 3, 0.85, false), // 18 * 2.5
+                                45, 3, 0.85, TipoEfeito.DANO), // 18 * 2.5
                         new Habilidade("Punhos dos Deuses", TipoHabilidade.FISICO,
-                                54, 4, 0.75, false) // 18 * 3
+                                54, 4, 0.75, TipoEfeito.DANO) // 18 * 3
                 ));
     }
 
@@ -29,48 +33,40 @@ public class Hercules extends Guerreiro {
 
     @Override
     public void usarHabilidade(Habilidade habilidade, model.interfaces.ICombatente alvo) {
-        if (podeUsarHabilidade(habilidade)) {
-            // Hércules tem 20% de chance de dano crítico
-            int dano = habilidade.calcularDano(getForca());
-            if (Math.random() < 0.2) {
-                dano = (int) (dano * 1.5);
-                System.out.println(AMARELO + "\nDANO CRÍTICO!" + RESET);
-            }
-
-            alvo.receberDano(dano);
-            System.out.println(AMARELO + "\nHércules usa " + habilidade.getNome() +
-                    " com poder divino e causa " + dano + " de dano!" + RESET);
-        } else {
-            System.out.println(AMARELO + "\nHércules não pode usar esta habilidade!" + RESET);
+        if (!podeUsarHabilidade(habilidade)) {
+            System.out.println(AMARELO + "\n" + getNome() + "não pode usar esta habilidade!" + RESET);
+            return;
         }
+        if (!(alvo instanceof Personagem)) {
+            System.out.println(AMARELO + "\nAlvo inválido para " + habilidade.getNome() + "!" + RESET);
+            return;
+        }
+
+        Personagem defensor = (Personagem) alvo;
+
+        calculadora.ResultadoAtaque r = calculadora.CalculoDano.calcularDetalhado(this, defensor, habilidade);
+
+        if (!r.acertou) {
+            System.out.printf(AMARELO + "%s usa %s mas ERRA (chance %.0f%%)!" + RESET + "%n",
+                    getNome(), habilidade.getNome(), r.chanceAcertoUsada * 100);
+            return;
+        }
+
+        if (r.critico) {
+            System.out.printf(VERMELHO + "CRÍTICO x%.2f! " + RESET, r.multiplicadorCritico);
+        }
+
+        int danoAplicado = defensor.receberDano(r.dano);
+        System.out.printf(AMARELO + "%n%s executa %s e causa %d de dano! " + RESET, getNome(), habilidade.getNome(), danoAplicado);
     }
 
     // Sobrescreve o método do guerreiro com versão mais poderosa
-    @Override
-    public void investidaFuriosa(model.interfaces.ICombatente alvo) {
-        int danoExtra = (int) (getForca() * 2.0); // Mais poderoso que um guerreiro comum
-        alvo.receberDano(danoExtra);
-        System.out.println(AMARELO + "\nHércules executa uma Investida Divina causando " +
-                danoExtra + " de dano devastador!" + RESET);
-    }
+//    @Override
+//    public void investidaFuriosa(model.interfaces.ICombatente alvo) {
+//        int danoExtra = (int) (getForca() * 2.0); // Mais poderoso que um guerreiro comum
+//        alvo.receberDano(danoExtra);
+//        System.out.println(AMARELO + "\nHércules executa uma Investida Divina causando " +
+//                danoExtra + " de dano devastador!" + RESET);
+//    }
 
-    // Habilidade única de Hércules
-    public void furiaDivina(model.interfaces.ICombatente alvo) {
-        System.out.println(AMARELO + "\nHércules entra em Fúria Divina!" + RESET);
-
-        // Múltiplos ataques
-        for (int i = 0; i < 3; i++) {
-            int dano = getForca() + (int) (Math.random() * getForca());
-            alvo.receberDano(dano);
-            System.out.println(AMARELO + "\nAtaque " + (i + 1) + ": " + dano + " de dano!" + RESET);
-        }
-    }
-
-    // Metodo especial para recuperar vida
-    public void regeneracaoDivina() {
-        int cura = getVidaMaxima() / 4;
-        curar(cura);
-        System.out.println(AMARELO + "\nHércules usa sua herança divina para recuperar " +
-                cura + " pontos de vida!" + RESET );
-    }
 }

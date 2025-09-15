@@ -1,8 +1,11 @@
 package model.personagens.herois;
 
 import model.habilidades.Habilidade;
+import model.habilidades.TipoEfeito;
 import model.habilidades.TipoHabilidade;
 import model.personagens.Mago;
+import model.personagens.Personagem;
+
 import java.util.Arrays;
 import static util.Cores.*;
 
@@ -12,11 +15,11 @@ public class Ragnar extends Mago {
         super("Ragnar", 100, 12, 8, 80, // Mais vida, força e defesa que um mago comum
                 Arrays.asList(
                         new Habilidade("Grito do Viking", TipoHabilidade.MAGICO,
-                                30, 4, 0.9, false), // 12 * 2.5
+                                30, 5, 0.96, TipoEfeito.DANO), // 12 * 2.5
                         new Habilidade("Machado de Gelo", TipoHabilidade.MAGICO,
-                                36, 5, 0.85, false), // 12 * 3
+                                36, 9, 1.25, TipoEfeito.DANO), // 12 * 3
                         new Habilidade("Fúria Nórdica", TipoHabilidade.MAGICO,
-                                42, 6, 0.8, false) // 12 * 3.5
+                                42, 12, 2.0, TipoEfeito.DANO) // 12 * 3.5
                 ));
     }
 
@@ -29,67 +32,45 @@ public class Ragnar extends Mago {
 
     @Override
     public void usarHabilidade(Habilidade habilidade, model.interfaces.ICombatente alvo) {
-        if (podeUsarHabilidade(habilidade)) {
-            // Ragnar tem 20% de chance de crítico mágico
-            int dano = habilidade.calcularDano(getForca());
-
-            if (Math.random() < 0.2) {
-                dano = (int) (dano * 1.5);
-                System.out.println(AMARELO + "\nCRÍTICO MÁGICO!" + RESET);
-            }
-
-            setPontosMagia(getPontosMagia() - habilidade.getCustoMana());
-            alvo.receberDano(dano);
-            System.out.println(AMARELO + "\nRagnar invoca " + habilidade.getNome() +
-                    " com poder nórdico e causa " + dano + " de dano mágico!" + RESET);
-        } else {
-            System.out.println(AMARELO + "\nRagnar não pode usar esta habilidade!" + RESET);
+        if (!podeUsarHabilidade(habilidade)) {
+            System.out.println(AMARELO + "\n" + getNome() + "não pode usar esta habilidade!" + RESET);
+            return;
         }
-    }
-
-    // Sobrescreve o metodo do mago com versão mais poderosa
-    @Override
-    public void explosaoArcana(model.interfaces.ICombatente alvo) {
-        if (getPontosMagia() >= 15) {
-            setPontosMagia(getPontosMagia() - 15);
-            int dano = (int) (getForca() * 2.5 + getPontosMagia() * 0.5);
-            alvo.receberDano(dano);
-            System.out.println(AMARELO + "\nRagnar libera uma Explosão Arcana Nórdica causando " +
-                    dano + " de dano devastador!" + RESET);
-        } else {
-            System.out.println(AMARELO + "\nRagnar não tem magia suficiente para esta habilidade!" + RESET);
-        }
-    }
-
-    // Habilidade única de Ragnar - Berserker Místico
-    public void berserkerMistico(model.interfaces.ICombatente alvo) {
-        System.out.println(AMARELO + "\nRagnar entra em estado de Berserker Místico!" + RESET);
-
-        // Combina dano físico e mágico em múltiplos ataques
-        for (int i = 0; i < 3; i++) {
-            int danoFisico = getForca() + (int) (Math.random() * getForca());
-            int danoMagico = (int) (getPontosMagia() * 0.3);
-            int danoTotal = danoFisico + danoMagico;
-
-            alvo.receberDano(danoTotal);
-            System.out.println(AMARELO + "\nAtaque Berserker " + (i + 1) + ": " +
-                    danoTotal + " de dano (Físico: " + danoFisico +
-                    ", Mágico: " + danoMagico + ")" + RESET);
+        if (!(alvo instanceof Personagem)) {
+            System.out.println(AMARELO + "\nAlvo inválido para " + habilidade.getNome() + "!" + RESET);
+            return;
         }
 
-        // Consome 20% da mana atual
-        setPontosMagia((int) (getPontosMagia() * 0.8));
+        Personagem defensor = (Personagem) alvo;
+
+        calculadora.ResultadoAtaque r = calculadora.CalculoDano.calcularDetalhado(this, defensor, habilidade);
+
+        if (!r.acertou) {
+            System.out.printf(AMARELO + "%s usa %s mas ERRA (chance %.0f%%)!" + RESET + "%n",
+                    getNome(), habilidade.getNome(), r.chanceAcertoUsada * 100);
+            return;
+        }
+
+        if (r.critico) {
+            System.out.printf(VERMELHO + "CRÍTICO x%.2f! " + RESET, r.multiplicadorCritico);
+        }
+
+        int danoAplicado = defensor.receberDano(r.dano);
+        System.out.printf(AMARELO + "%n%s executa %s e causa %d de dano! " + RESET, getNome(), habilidade.getNome(), danoAplicado);
     }
 
-    // Metodo especial para regeneração nórdica
-    public void regeneracaoNordica() {
-        int cura = getVidaMaxima() / 4;
-        int manaRecuperada = (int) (getPontosMagia() * 0.4);
+//    // Sobrescreve o metodo do mago com versão mais poderosa
+//    @Override
+//    public void explosaoArcana(model.interfaces.ICombatente alvo) {
+//        if (getPontosMagia() >= 15) {
+//            setPontosMagia(getPontosMagia() - 15);
+//            int dano = (int) (getForca() * 2.5 + getPontosMagia() * 0.5);
+//            alvo.receberDano(dano);
+//            System.out.println(AMARELO + "\nRagnar libera uma Explosão Arcana Nórdica causando " +
+//                    dano + " de dano devastador!" + RESET);
+//        } else {
+//            System.out.println(AMARELO + "\nRagnar não tem magia suficiente para esta habilidade!" + RESET);
+//        }
+//    }
 
-        curar(cura);
-        setPontosMagia(getPontosMagia() + manaRecuperada);
-
-        System.out.println(AMARELO + "\nRagnar invoca a regeneração nórdica, recuperando " +
-                cura + " de vida e " + manaRecuperada + " de magia!" + RESET);
-    }
 }

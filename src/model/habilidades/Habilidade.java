@@ -1,5 +1,4 @@
 package model.habilidades;
-
 import model.personagens.Personagem;
 
 public class Habilidade {
@@ -35,6 +34,8 @@ public class Habilidade {
         this.danoBase = danoBase;
         this.multiplicador = multiplicador;
         this.tipoEfeito = tipoEfeito;
+        this.chanceAcerto = 1.0;
+        this.chanceCritico = 0.0;
     }
 
     public boolean acertou() {

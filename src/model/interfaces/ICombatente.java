@@ -5,7 +5,7 @@ public interface ICombatente {
     int getVidaAtual();
     int getVidaMaxima();
     boolean estaVivo();
-    void receberDano(int dano);
+    int receberDano(int dano);
     int calcularAtaque();
     int calcularDefesa();
 }

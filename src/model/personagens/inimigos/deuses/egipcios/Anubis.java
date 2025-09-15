@@ -1,10 +1,14 @@
 package model.personagens.inimigos.deuses.egipcios;
 
+import calculadora.CalculoDano;
 import model.habilidades.Habilidade;
+import model.habilidades.TipoEfeito;
 import model.habilidades.TipoHabilidade;
 import model.personagens.Guerreiro;
 import model.interfaces.ICombatente;
 import model.personagens.GuerreiroInimigo;
+import model.personagens.Personagem;
+
 import static util.Cores.*;
 import java.util.Arrays;
 
@@ -14,11 +18,11 @@ public class Anubis extends GuerreiroInimigo {
         super("Anubis", 100, 16, 12,
                 Arrays.asList(
                         new Habilidade("Lâmina das Sombras", TipoHabilidade.FISICO,
-                                32, 2, 0.9, false), // 16 * 2
+                                32, 2, 0.9, TipoEfeito.DANO), // 16 * 2
                         new Habilidade("Toque da Morte", TipoHabilidade.FISICO,
-                                40, 3, 0.85, false), // 16 * 2.5
+                                40, 3, 0.85, TipoEfeito.DANO), // 16 * 2.5
                         new Habilidade("Punho do Submundo", TipoHabilidade.FISICO,
-                                48, 4, 0.75, false) // 16 * 3
+                                48, 4, 0.75, TipoEfeito.DANO) // 16 * 3
                 ));
     }
 
@@ -29,70 +33,43 @@ public class Anubis extends GuerreiroInimigo {
     }
 
     @Override
-    public void usarHabilidade(Habilidade habilidade, ICombatente alvo) {
-        if (podeUsarHabilidade(habilidade)) {
-            //tem 20% de chance de dano crítico
-            int dano = habilidade.calcularDano(getForca());
-            if (Math.random() < 0.2) {
-                dano = (int) (dano * 1.5);
-                System.out.println(AMARELO + "\nDANO CRÍTICO!" + RESET);
-            }
-
-            alvo.receberDano(dano);
-            System.out.println(AMARELO + "\nAnubis usa " + habilidade.getNome() +
-                    " com poder divino e causa " + dano + " de dano!" + RESET);
-        } else {
-            System.out.println(AMARELO + "\nAnubis não pode usar esta habilidade!" + RESET);
+    public void usarHabilidade(Habilidade habilidade, model.interfaces.ICombatente alvo) {
+        if (!podeUsarHabilidade(habilidade)) {
+            System.out.println(AMARELO + "\n" + getNome() + "não pode usar esta habilidade!" + RESET);
+            return;
         }
+        if (!(alvo instanceof Personagem)) {
+            System.out.println(AMARELO + "\nAlvo inválido para " + habilidade.getNome() + "!" + RESET);
+            return;
+        }
+
+        Personagem defensor = (Personagem) alvo;
+
+        calculadora.ResultadoAtaque r = calculadora.CalculoDano.calcularDetalhado(this, defensor, habilidade);
+
+        if (!r.acertou) {
+            System.out.printf(AMARELO + "%s usa %s mas ERRA (chance %.0f%%)!" + RESET + "%n",
+                    getNome(), habilidade.getNome(), r.chanceAcertoUsada * 100);
+            return;
+        }
+
+        if (r.critico) {
+            System.out.printf(VERMELHO + "CRÍTICO x%.2f! " + RESET, r.multiplicadorCritico);
+        }
+
+        int danoAplicado = defensor.receberDano(r.dano);
+        System.out.printf(AMARELO + "%n%s executa %s e causa %d de dano! " + RESET, getNome(), habilidade.getNome(), danoAplicado);
     }
 
     // Sobrescreve o metodo do guerreiro com versão sombria
-    @Override
-    public void investidaFuriosa(ICombatente alvo) {
-        int danoExtra = (int) (getForca() * 2.2); // Mais poderoso que um guerreiro comum
-        alvo.receberDano(danoExtra);
-        System.out.println(AMARELO + "\nAnubis executa uma Investida das Trevas causando " +
-                danoExtra + " de dano e enfraquecendo o alvo!" + RESET);
+//    @Override
+//    public void investidaFuriosa(ICombatente alvo) {
+//        int danoExtra = (int) (getForca() * 2.2); // Mais poderoso que um guerreiro comum
+//        alvo.receberDano(danoExtra);
+//        System.out.println(AMARELO + "\nAnubis executa uma Investida das Trevas causando " +
+//                danoExtra + " de dano e enfraquecendo o alvo!" + RESET);
+//
+//        // Lógica para aplicar enfraquecimento seria implementada aqui
+//    }
 
-        // Lógica para aplicar enfraquecimento seria implementada aqui
-    }
-
-    // Habilidade única de Hades - Invoca espíritos do submundo
-    public void invocacaoEspiritual(ICombatente alvo) {
-        System.out.println(AMARELO + "\nAnubis invoca espíritos do Submundo!" + RESET);
-
-        // Ataques múltiplos com chance de ignorar defesa
-        for (int i = 0; i < 2; i++) {
-            int danoBase = getForca() + (int) (Math.random() * getForca() / 2);
-
-            // 40% de chance de ignorar defesa
-            if (Math.random() < 0.4) {
-                danoBase = (int) (danoBase * 1.2); // Dano aumentado quando ignora defesa
-                System.out.println(AMARELO + "\nO espírito atravessa as defesas!" + RESET);
-            }
-
-            alvo.receberDano(danoBase);
-            System.out.println(AMARELO + "\nEspírito " + (i + 1) + ": " + danoBase + " de dano!" + RESET);
-        }
-    }
-
-    // Habilidade única para manipular as sombras
-    public void mantoDasSombras(model.interfaces.ICombatente alvo) {
-        System.out.println(AMARELO + "\nAnubis se envolve em um manto de sombras!" + RESET);
-
-        // Múltiplos ataques
-        for (int i = 0; i < 3; i++) {
-            int dano = getForca() + (int) (Math.random() * getForca());
-            alvo.receberDano(dano);
-            System.out.println(AMARELO + "\nAtaque " + (i + 1) + ": " + dano + " de dano!" + RESET);
-        }
-    }
-
-    // Metodo especial para recuperar vida
-    public void olharAmedrontador() {
-        int cura = getVidaMaxima() / 4;
-        curar(cura);
-        System.out.println(AMARELO + "\nAnubis usa sua herança divina para recuperar " +
-                cura + " pontos de vida!" + RESET);
-    }
 }
