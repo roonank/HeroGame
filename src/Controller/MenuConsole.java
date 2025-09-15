@@ -1,8 +1,8 @@
 package Controller;
 
+import model.Torre;
 import model.habilidades.Habilidade;
 import model.personagens.Heroi;
-import model.personagens.herois.*;
 
 import java.util.List;
 import java.util.Scanner;
@@ -113,14 +113,14 @@ public class MenuConsole {
 
     private void distribuirPontos(Heroi heroi) {
         while (heroi.getPontosHabilidade() > 0) {
-            System.out.println("\nPontos disponíveis: " + heroi.getPontosHabilidade());
-            System.out.println("Escolha um atributo para aplicar pontos:");
-            System.out.println("1) Força   2) Defesa   3) Vida Máx (+5)  0) Sair");
+            System.out.println(AMARELO + "\nPontos disponíveis: " + heroi.getPontosHabilidade()
+                                + "Escolha um atributo para aplicar pontos:"
+                                + "1) Força   2) Defesa   3) Vida Máx (+5)  0) Sair" + RESET);
 
             int op = lerOpcao(0, 3);
             if (op == 0) break;
 
-            System.out.print("Quantos pontos deseja aplicar? (0 para cancelar)");
+            System.out.print(AMARELO +"\nQuantos pontos deseja aplicar? (0 para cancelar)" + RESET);
             int max = heroi.getPontosHabilidade();
             int qtd = lerOpcao(0, max);
 

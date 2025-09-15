@@ -1,4 +1,7 @@
-package Controller;
+package model;
+
+import Controller.Batalha;
+import Controller.Jogo;
 
 public class Torre {
     private final Jogo jogo;

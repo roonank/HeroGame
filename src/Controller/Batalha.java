@@ -129,7 +129,7 @@ public class Batalha {
                     return;
                 }
 
-                int aplicado = def.receberDano(r.dano); // se for void, use r.dano
+                int aplicado = def.receberDano(r.dano);
                 if (r.critico) logBatalha.add(ROXO + "CRÍTICO x" + String.format("%.2f", r.multiplicadorCritico) + "!" + RESET);
 
                 logBatalha.add(CIANO + atk.getNome() + " usou " + habilidade.getNome() + " e causou " +

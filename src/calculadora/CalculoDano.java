@@ -5,9 +5,9 @@ import model.personagens.Personagem;
 
 public class CalculoDano {
     private static final double DEFESA_BASE_CURVA = 100.0;
-    private static final boolean DEBUG = false; // ligue se quiser ver números
 
-    private CalculoDano() {}
+    private CalculoDano() {
+    }
 
     public static int calcularDano(Personagem atacante, Personagem defensor, Habilidade habilidade) {
         return calcularDetalhado(atacante, defensor, habilidade).dano;
@@ -28,11 +28,11 @@ public class CalculoDano {
         double danoBruto = habilidade.getDanoBase() + (atacante.getForca() * habilidade.getMultiplicador());
         if (danoBruto < 0) danoBruto = 0;
 
-        double chanceCriticoUsada = habilidade.getChanceCritico(); // mantenha 0..1 nas habilidades
+        double chanceCriticoUsada = habilidade.getChanceCritico();
         boolean critico = Math.random() < chanceCriticoUsada;
         double multCritico = 1.0;
         if (critico) {
-            multCritico = 1.0 + Math.random(); // [1.0, 2.0)
+            multCritico = 1.0 + Math.random();
             danoBruto *= multCritico;
         }
 
