@@ -34,13 +34,21 @@ public class Poseidon extends MagoInimigo {
     @Override
     public void usarHabilidade(Habilidade habilidade, model.interfaces.ICombatente alvo) {
         if (!podeUsarHabilidade(habilidade)) {
-            System.out.println(AMARELO + "\n" + getNome() + "não pode usar esta habilidade!" + RESET);
+            System.out.println(AMARELO + "\nAquiles não pode usar esta habilidade!" + RESET);
             return;
         }
         if (!(alvo instanceof Personagem)) {
             System.out.println(AMARELO + "\nAlvo inválido para " + habilidade.getNome() + "!" + RESET);
             return;
         }
+
+        int custo = habilidade.getCustoMana();
+        if (!temMana(custo)){
+            System.out.printf(AMARELO + "\nMana insuficiente! (%d/%d) - %s custa %d." + RESET + getManaAtual(), getManaMaxima(), habilidade.getNome(), custo);
+            return;
+        }
+
+        gastarMana(custo);
 
         Personagem defensor = (Personagem) alvo;
 
