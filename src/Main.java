@@ -2,7 +2,7 @@ import Controller.MenuConsole;
 
 public class Main {
     public static void main(String[] args) {
-        int executarConsoleTela = 1;
+        int executarConsoleTela = 2;
         if(executarConsoleTela == 1){
             new MenuConsole().iniciar();
         } else if (executarConsoleTela == 2) {

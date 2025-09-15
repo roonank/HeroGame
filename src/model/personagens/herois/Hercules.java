@@ -60,13 +60,4 @@ public class Hercules extends Guerreiro {
         System.out.printf(AMARELO + "%n%s executa %s e causa %d de dano! " + RESET, getNome(), habilidade.getNome(), danoAplicado);
     }
 
-    // Sobrescreve o método do guerreiro com versão mais poderosa
-//    @Override
-//    public void investidaFuriosa(model.interfaces.ICombatente alvo) {
-//        int danoExtra = (int) (getForca() * 2.0); // Mais poderoso que um guerreiro comum
-//        alvo.receberDano(danoExtra);
-//        System.out.println(AMARELO + "\nHércules executa uma Investida Divina causando " +
-//                danoExtra + " de dano devastador!" + RESET);
-//    }
-
 }
