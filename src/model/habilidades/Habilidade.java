@@ -2,49 +2,44 @@ package model.habilidades;
 
 public class Habilidade {
     private String nome;
-    private TipoHabilidade tipo;
-    private int danoBase;
+    private String descricao;
     private int custoMana;
+    private int danoBase;
+    private double multiplicador;
+    private TipoEfeito tipoEfeito;
+    private TipoHabilidade tipo;
+    private int duracao;
     private double chanceAcerto;
-    private boolean critica;
+    private double chanceCritico;
+    private boolean ultimate;
 
-    public Habilidade(String nome, TipoHabilidade tipo, int danoBase, int custoMana,
-                      double chanceAcerto, boolean critica) {
+    public Habilidade(String nome, String descricao, int custoMana, int danoBase, double multiplicador, TipoEfeito tipoEfeito,
+                      TipoHabilidade tipo, int duracao, double chanceAcerto, double chanceCritico, boolean ultimate) {
         this.nome = nome;
-        this.tipo = tipo;
-        this.danoBase = danoBase;
+        this.descricao = descricao;
         this.custoMana = custoMana;
+        this.danoBase = danoBase;
+        this.multiplicador = multiplicador;
+        this.tipoEfeito = tipoEfeito;
+        this.tipo = tipo;
+        this.duracao = duracao;
         this.chanceAcerto = chanceAcerto;
-        this.critica = critica;
+        this.chanceCritico = chanceCritico;
+        this.ultimate = ultimate;
     }
 
-    public int calcularDano(int atributoPersonagem) {
-        if (Math.random() > chanceAcerto) return 0; // Errou
-
-        int dano = danoBase + (atributoPersonagem / 2);
-
-        // Sistema de crítico (20% chance base)
-        if (critica && Math.random() < 0.2) {
-            dano = (int) (dano * 1.5);
-        }
-
-        return dano;
+    public boolean acertou() {
+        return Math.random() < chanceAcerto;
     }
 
     // Getters
-    public String getNome() {
-        return nome;
-    }
-
+    public String getNome() { return nome; }
+    public String getDescricao() { return descricao; }
+    public int getCustoMana() { return custoMana; }
     public TipoHabilidade getTipo() {
         return tipo;
     }
-
-    public int getCustoMana() {
-        return custoMana;
-    }
-
-    public boolean isCritica() {
-        return critica;
-    }
+    public TipoEfeito getTipoEfeito() { return tipoEfeito; }
+    public int getDuracao() { return duracao; }
+    public boolean isUltimate() { return ultimate; }
 }

@@ -105,21 +105,23 @@ public class MenuConsole {
     }
 
     private void distribuirPontos(Heroi heroi) {
-        if (heroi.getPontosDisponiveis() <= 0) return;
-        System.out.println(AMARELO + "\nVocê tem " + heroi.getPontosDisponiveis() + " pontos para distribuir!" + RESET);
-        System.out.println(VERDE + "1 - Força" + RESET);
-        System.out.println(VERDE + "2 - Defesa" + RESET);
-        System.out.println(VERDE + "3 - Vida" + RESET);
-        System.out.print(AMARELO + "Escolha o atributo: " + RESET);
+        if (heroi.getPontosDisponiveis() > 0) {
+            System.out.println(AMARELO + "\nVocê tem " + heroi.getPontosDisponiveis() + " pontos para distribuir!" + RESET);
+            System.out.println(VERDE + "1 - Força" + RESET);
+            System.out.println(VERDE + "2 - Defesa" + RESET);
+            System.out.println(VERDE + "3 - Vida" + RESET);
+            System.out.print(AMARELO + "Escolha o atributo: " + RESET);
 
-        int escolha = lerOpcao(1, 3);
-        System.out.print(AMARELO + "Quantos pontos deseja gastar? " + RESET);
-        int qtd = Integer.parseInt(scanner.nextLine());
-        switch (escolha) {
-            case 1 -> heroi.distribuirPontos("forca", qtd);
-            case 2 -> heroi.distribuirPontos("defesa", qtd);
-            case 3 -> heroi.distribuirPontos("vida", qtd);
+            int escolha = lerOpcao(1, 3);
+            System.out.print(AMARELO + "Quantos pontos deseja gastar? " + RESET);
+            int qtd = Integer.parseInt(scanner.nextLine());
+            switch (escolha) {
+                case 1 -> heroi.distribuirPontos("forca", qtd);
+                case 2 -> heroi.distribuirPontos("defesa", qtd);
+                case 3 -> heroi.distribuirPontos("vida", qtd);
+            }
         }
+
     }
 
     private int lerOpcao(int min, int max) {
