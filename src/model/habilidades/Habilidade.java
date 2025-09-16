@@ -2,30 +2,26 @@ package model.habilidades;
 import model.habilidades.efeitos.TipoEfeito;
 
 public class Habilidade {
-    private String nome;
-    private String descricao;
-    private int custoMana;
-    private int danoBase;
-    private double multiplicador;
-    private TipoEfeito tipoEfeito;
-    private TipoHabilidade tipo;
-    private int duracao;
-    private double chanceAcerto;
-    private double chanceCritico;
+    private final String nome;
+    private final int custoMana;
+    private final int danoBase;
+    private final double multiplicador;
+    private final TipoEfeito tipoEfeito;
+    private final TipoHabilidade tipo;
+    private final double chanceAcerto;
+    private final double chanceCritico;
     private int duracaoEfeito = 0;
     private double chanceEfeito = 0.0;
     private double poderEfeito = 0.0;
 
-    public Habilidade(String nome, String descricao, int custoMana, int danoBase, double multiplicador, TipoEfeito tipoEfeito,
-                      TipoHabilidade tipo, int duracao, double chanceAcerto, double chanceCritico) {
+    public Habilidade(String nome, int custoMana, int danoBase, double multiplicador, TipoEfeito tipoEfeito,
+                      TipoHabilidade tipo, double chanceAcerto, double chanceCritico) {
         this.nome = nome;
-        this.descricao = descricao;
         this.custoMana = custoMana;
         this.danoBase = danoBase;
         this.multiplicador = multiplicador;
         this.tipoEfeito = tipoEfeito;
         this.tipo = tipo;
-        this.duracao = duracao;
         this.chanceAcerto = chanceAcerto;
         this.chanceCritico = chanceCritico;
     }

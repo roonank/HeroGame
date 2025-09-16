@@ -53,17 +53,17 @@ public class Ra extends MagoInimigo {
 
         calculadora.ResultadoAtaque r = calculadora.CalculoDano.calcularDetalhado(this, defensor, habilidade);
 
-        if (!r.acertou) {
+        if (!r.acertou()) {
             System.out.printf(AMARELO + "%s usa %s mas ERRA (chance %.0f%%)!" + RESET + "%n",
-                    getNome(), habilidade.getNome(), r.chanceAcertoUsada * 100);
+                    getNome(), habilidade.getNome(), r.chanceAcertoUsada() * 100);
             return;
         }
 
-        if (r.critico) {
-            System.out.printf(VERMELHO + "CRÍTICO x%.2f! " + RESET, r.multiplicadorCritico);
+        if (r.critico()) {
+            System.out.printf(VERMELHO + "CRÍTICO x%.2f! " + RESET, r.multiplicadorCritico());
         }
 
-        int danoAplicado = defensor.receberDano(r.dano);
+        int danoAplicado = defensor.receberDano(r.dano());
         System.out.printf(AMARELO + "%n%s executa %s e causa %d de dano! " + RESET, getNome(), habilidade.getNome(), danoAplicado);
     }
 }

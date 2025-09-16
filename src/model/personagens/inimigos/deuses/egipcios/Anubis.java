@@ -12,10 +12,10 @@ import java.util.Arrays;
 public class Anubis extends GuerreiroInimigo {
 
     public Anubis() {
-        super("Anubis", 100, 16, 12,
+        super("Anúbis", 100, 16, 12,
                 Arrays.asList(
                         new Habilidade("Lâmina das Sombras", TipoHabilidade.FISICO,
-                                32, 2, 0.9, TipoEfeito.DANO), // 16 * 2
+                                32, 2, 0.9, TipoEfeito.ENVENENAMENTO).comEfeito(2, 0.6, 0.5), // 16 * 2
                         new Habilidade("Toque da Morte", TipoHabilidade.FISICO,
                                 40, 3, 0.85, TipoEfeito.DANO), // 16 * 2.5
                         new Habilidade("Punho do Submundo", TipoHabilidade.FISICO,
@@ -32,7 +32,7 @@ public class Anubis extends GuerreiroInimigo {
     @Override
     public void usarHabilidade(Habilidade habilidade, model.interfaces.ICombatente alvo) {
         if (!podeUsarHabilidade(habilidade)) {
-            System.out.println(AMARELO + "\nAquiles não pode usar esta habilidade!" + RESET);
+            System.out.println(AMARELO + "\nAnúbis não pode usar esta habilidade!" + RESET);
             return;
         }
         if (!(alvo instanceof Personagem)) {
@@ -52,17 +52,17 @@ public class Anubis extends GuerreiroInimigo {
 
         calculadora.ResultadoAtaque r = calculadora.CalculoDano.calcularDetalhado(this, defensor, habilidade);
 
-        if (!r.acertou) {
+        if (!r.acertou()) {
             System.out.printf(AMARELO + "%s usa %s mas ERRA (chance %.0f%%)!" + RESET + "%n",
-                    getNome(), habilidade.getNome(), r.chanceAcertoUsada * 100);
+                    getNome(), habilidade.getNome(), r.chanceAcertoUsada() * 100);
             return;
         }
 
-        if (r.critico) {
-            System.out.printf(VERMELHO + "CRÍTICO x%.2f! " + RESET, r.multiplicadorCritico);
+        if (r.critico()) {
+            System.out.printf(VERMELHO + "CRÍTICO x%.2f! " + RESET, r.multiplicadorCritico());
         }
 
-        int danoAplicado = defensor.receberDano(r.dano);
+        int danoAplicado = defensor.receberDano(r.dano());
         System.out.printf(AMARELO + "%n%s executa %s e causa %d de dano! " + RESET, getNome(), habilidade.getNome(), danoAplicado);
     }
 }

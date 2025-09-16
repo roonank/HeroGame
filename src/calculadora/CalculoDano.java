@@ -10,7 +10,7 @@ public class CalculoDano {
     }
 
     public static int calcularDano(Personagem atacante, Personagem defensor, Habilidade habilidade) {
-        return calcularDetalhado(atacante, defensor, habilidade).dano;
+        return calcularDetalhado(atacante, defensor, habilidade).dano();
     }
 
     public static ResultadoAtaque calcularDetalhado(Personagem atacante, Personagem defensor, Habilidade habilidade) {
