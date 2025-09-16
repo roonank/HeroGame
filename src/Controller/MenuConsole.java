@@ -13,7 +13,7 @@ import static util.Cores.*;
 
 public class MenuConsole {
     private final Scanner scanner = new Scanner(System.in);
-    private Random random = new Random();
+    private final Random random = new Random();
 
     public void iniciar() {
         System.out.println(AZUL + "=== TOWER OF TRIALS ===" + RESET);
@@ -154,18 +154,18 @@ public class MenuConsole {
     }
 
     private void evoluirInimigo(List<Inimigo> inimigos) {
-        for (int i = 0; i < inimigos.size(); i++) {
+        for (Inimigo inimigo : inimigos) {
             int op = random.nextInt(3) + 1;
-            int max = inimigos.get(i).getPontosHabilidade();
+            int max = inimigo.getPontosHabilidade();
             int qtd = random.nextInt(max + 1);
 
-            if (qtd == 0 || !inimigos.get(i).gastarPontosHabilidade(qtd)) {
+            if (qtd == 0 || !inimigo.gastarPontosHabilidade(qtd)) {
                 continue;
             }
             switch (op) {
-                case 1 -> inimigos.get(i).addForca(qtd);
-                case 2 -> inimigos.get(i).addDefesa(qtd);
-                case 3 -> inimigos.get(i).addVidaMaxima(5 * qtd);
+                case 1 -> inimigo.addForca(qtd);
+                case 2 -> inimigo.addDefesa(qtd);
+                case 3 -> inimigo.addVidaMaxima(5 * qtd);
             }
         }
         System.out.println(VERDE + "Inimigos Evoluidos" + RESET);

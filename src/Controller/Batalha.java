@@ -112,16 +112,16 @@ public class Batalha {
                     break;
                 }
                 var r = calculadora.CalculoDano.calcularDetalhado(atk, def, ATAQUE_BASICO);
-                if (!r.acertou) {
+                if (!r.acertou()) {
                     logBatalha.add(AMARELO + atk.getNome() + " tentou atacar mas ERROU (" +
-                            Math.round(r.chanceAcertoUsada * 100) + "%)." + RESET);
+                            Math.round(r.chanceAcertoUsada() * 100) + "%)." + RESET);
                     break;
                 }
-                int aplicado = def.receberDano(r.dano);
-                if (r.critico)
-                    logBatalha.add(ROXO + "CRÍTICO x" + String.format("%.2f", r.multiplicadorCritico) + "!" + RESET);
+                int aplicado = def.receberDano(r.dano());
+                if (r.critico())
+                    logBatalha.add(ROXO + "CRÍTICO x" + String.format("%.2f", r.multiplicadorCritico()) + "!" + RESET);
                 logBatalha.add(VERMELHO + atk.getNome() + " atacou " + def.getNome() + " causando " +
-                        (aplicado > 0 ? aplicado : r.dano) + " de dano!" + RESET);
+                        (aplicado > 0 ? aplicado : r.dano()) + " de dano!" + RESET);
             }
 
             case DEFENDER -> {
@@ -153,21 +153,21 @@ public class Batalha {
                 atk.gastarMana(custo);
 
                 var r = calculadora.CalculoDano.calcularDetalhado(atk, def, habilidade);
-                if (!r.acertou) {
+                if (!r.acertou()) {
                     logBatalha.add(AMARELO + atk.getNome() + " usa " + habilidade.getNome() +
-                            " mas ERRA (" + Math.round(r.chanceAcertoUsada * 100) + "%). " +
+                            " mas ERRA (" + Math.round(r.chanceAcertoUsada() * 100) + "%). " +
                             "Mana: " + atk.getManaAtual() + "/" + atk.getManaMaxima() + RESET);
                     break;
                 }
 
-                int aplicado = def.receberDano(r.dano);
-                if (r.critico)
-                    logBatalha.add(ROXO + "CRÍTICO x" + String.format("%.2f", r.multiplicadorCritico) + "!" + RESET);
+                int aplicado = def.receberDano(r.dano());
+                if (r.critico())
+                    logBatalha.add(ROXO + "CRÍTICO x" + String.format("%.2f", r.multiplicadorCritico()) + "!" + RESET);
 
                 tentarAplicarEfeito(habilidade, def);
 
                 logBatalha.add(CIANO + atk.getNome() + " usou " + habilidade.getNome() + " e causou " +
-                        (aplicado > 0 ? aplicado : r.dano) + " de dano! " +
+                        (aplicado > 0 ? aplicado : r.dano()) + " de dano! " +
                         AZUL + "(Mana: " + atk.getManaAtual() + "/" + atk.getManaMaxima() + ")" + RESET);
             }
 
