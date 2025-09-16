@@ -1,10 +1,8 @@
 package model.personagens.inimigos.deuses.egipcios;
 
-import calculadora.CalculoDano;
 import model.habilidades.Habilidade;
-import model.habilidades.TipoEfeito;
+import model.habilidades.efeitos.TipoEfeito;
 import model.habilidades.TipoHabilidade;
-import model.interfaces.ICombatente;
 import model.personagens.MagoInimigo;
 import model.personagens.Personagem;
 

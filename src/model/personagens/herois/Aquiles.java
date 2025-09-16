@@ -1,8 +1,7 @@
 package model.personagens.herois;
 
-import calculadora.CalculoDano;
 import model.habilidades.Habilidade;
-import model.habilidades.TipoEfeito;
+import model.habilidades.efeitos.TipoEfeito;
 import model.habilidades.TipoHabilidade;
 import model.personagens.Guerreiro;
 import model.personagens.Personagem;
@@ -17,7 +16,7 @@ public class Aquiles extends Guerreiro {
         super("Aquiles", 100, 17, 9,
                 Arrays.asList(
                         new Habilidade("Golpe do Talão", TipoHabilidade.FISICO,
-                                34, 5, 0.95, TipoEfeito.DANO), // 17 * 2
+                                34, 5, 0.95, TipoEfeito.STUN).comEfeito(1, 0.55, 0.0), // 17 * 2
                         new Habilidade("Investida Imortal", TipoHabilidade.FISICO,
                                 42, 8, 1.25, TipoEfeito.DANO), // 17 * 2.5
                         new Habilidade("Fúria do Herói", TipoHabilidade.FISICO,

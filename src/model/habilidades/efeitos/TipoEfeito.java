@@ -1,4 +1,4 @@
-package model.habilidades;
+package model.habilidades.efeitos;
 
 public enum TipoEfeito {
     DANO,

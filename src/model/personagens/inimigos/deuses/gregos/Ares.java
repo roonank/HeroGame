@@ -1,8 +1,7 @@
 package model.personagens.inimigos.deuses.gregos;
 
-import calculadora.CalculoDano;
 import model.habilidades.Habilidade;
-import model.habilidades.TipoEfeito;
+import model.habilidades.efeitos.TipoEfeito;
 import model.habilidades.TipoHabilidade;
 import model.personagens.GuerreiroInimigo;
 import model.personagens.Personagem;

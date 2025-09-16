@@ -1,5 +1,6 @@
 package model.personagens;
 
+import model.habilidades.efeitos.EfeitoStatus;
 import model.interfaces.ICombatente;
 import model.habilidades.Habilidade;
 import model.interfaces.IHabilidade;
@@ -18,6 +19,7 @@ public abstract class Personagem implements ICombatente, IHabilidade {
     protected int manaMaxima = 150;
     protected int manaAtual = 150;
     protected int pontosHabilidade = 0;
+    private final List<EfeitoStatus> efeitos = new ArrayList<>();
 
     public Personagem(String nome, int pontosVida, int forca, int defesa) {
         this.nome = nome;
@@ -27,6 +29,33 @@ public abstract class Personagem implements ICombatente, IHabilidade {
         this.defesa = defesa;
         this.habilidades = new ArrayList<>();
         this.defendendo = false;
+    }
+
+    public void aplicarEfeito(EfeitoStatus e, List<String> log) {
+        efeitos.add(e);
+        e.aoAplicar(this, log);
+    }
+
+    public boolean impedidoDeAgir() {
+        for (var e : efeitos) if (e.impedeAgir()) return true;
+        return false;
+    }
+
+    public void processarEfeitosInicio(java.util.List<String> log) {
+        for (var e : new java.util.ArrayList<>(efeitos)) e.inicioDoTurno(this, log);
+    }
+
+    public void processarEfeitosFim(List<String> log) {
+        for (var e : new ArrayList<>(efeitos)) e.fimDoTurno(this, log);
+        var it = efeitos.iterator();
+        while (it.hasNext()) {
+            var e = it.next();
+            e.tick();
+            if (e.expirou()) {
+                it.remove();
+                log.add("⏳ O efeito " + e.getNome() + " em " + getNome() + " expirou.");
+            }
+        }
     }
 
     public int getPontosHabilidade() {

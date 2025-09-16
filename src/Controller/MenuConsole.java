@@ -16,7 +16,7 @@ public class MenuConsole {
     private Random random = new Random();
 
     public void iniciar() {
-        System.out.println(AZUL + "=== TORRE DOS DEUSES ===" + RESET);
+        System.out.println(AZUL + "=== TOWER OF TRIALS ===" + RESET);
         Jogo jogo = new Jogo();
         /*List<Heroi> herois = List.of(
                 "Aquiles",//new Aquiles(),

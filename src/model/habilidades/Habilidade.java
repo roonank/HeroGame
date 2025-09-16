@@ -1,5 +1,5 @@
 package model.habilidades;
-import model.personagens.Personagem;
+import model.habilidades.efeitos.TipoEfeito;
 
 public class Habilidade {
     private String nome;
@@ -12,6 +12,9 @@ public class Habilidade {
     private int duracao;
     private double chanceAcerto;
     private double chanceCritico;
+    private int duracaoEfeito = 0;
+    private double chanceEfeito = 0.0;
+    private double poderEfeito = 0.0;
 
     public Habilidade(String nome, String descricao, int custoMana, int danoBase, double multiplicador, TipoEfeito tipoEfeito,
                       TipoHabilidade tipo, int duracao, double chanceAcerto, double chanceCritico) {
@@ -38,11 +41,22 @@ public class Habilidade {
         this.chanceCritico = 0.0;
     }
 
+
+    public Habilidade comEfeito(int duracao, double chance, double poder) {
+        this.duracaoEfeito = Math.max(0, duracao);
+        this.chanceEfeito = Math.max(0.0, Math.min(1.0, chance));
+        this.poderEfeito = Math.max(0.0, poder);
+        return this;
+    }
+
     public boolean acertou() {
         return Math.random() < chanceAcerto;
     }
 
-    // Getters
+    public int getDuracaoEfeito() { return duracaoEfeito; }
+    public double getChanceEfeito() { return chanceEfeito; }
+    public double getPoderEfeito() { return poderEfeito; }
+    public TipoEfeito getTipoEfeito() { return tipoEfeito; }
     public int getDanoBase() { return danoBase; }
     public double getMultiplicador() { return multiplicador; }
     public double getChanceAcerto() { return chanceAcerto; }
