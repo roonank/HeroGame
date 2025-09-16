@@ -18,13 +18,6 @@ public class MenuConsole {
     public void iniciar() {
         System.out.println(AZUL + "=== TOWER OF TRIALS ===" + RESET);
         Jogo jogo = new Jogo();
-        /*List<Heroi> herois = List.of(
-                "Aquiles",//new Aquiles(),
-                "Hércules",//new Hercules(),
-                "Perseu",//new Perseu(),
-                "Ragnar",//new Ragnar(),
-                "Gilgamesh"//new Gilgamesh()
-        );*/
         List<String> herois = List.of(
                 "Aquiles",//new Aquiles(),
                 "Hércules",//new Hercules(),
