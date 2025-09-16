@@ -150,7 +150,6 @@ public class Batalha {
         }
     }
 
-
     private AcaoBatalha escolherAcaoInimigo() {
         return random.nextInt(100) < 70 ?
                 AcaoBatalha.ATACAR : AcaoBatalha.DEFENDER;
@@ -169,11 +168,6 @@ public class Batalha {
     }
 
     public String getStatusVida() {
-        return jogador.getNome() + ": " + jogador.getVidaAtual() + "/" + jogador.getVidaMaxima() +
-                " | " + inimigo.getNome() + ": " + inimigo.getVidaAtual() + "/" + inimigo.getVidaMaxima();
-    }
-
-    public String getStatusVidaColorido() {
         return VERDE + jogador.getNome() + ": " + jogador.getVidaAtual() + "/" + jogador.getVidaMaxima() + RESET +
                 " | " + VERMELHO + inimigo.getNome() + ": " + inimigo.getVidaAtual() + "/" + inimigo.getVidaMaxima() + RESET;
     }

@@ -18,10 +18,6 @@ public class Jogo {
         andarAtual = 0;
     }
 
-    public void setJogador(Heroi heroi) {
-        this.jogador = heroi;
-    }
-
     public void escolherHeroi(int opcao) {
         switch (opcao) {
             case 1 -> jogador = new Aquiles();
@@ -58,6 +54,11 @@ public class Jogo {
         andarAtual++;
         boolean eUltimoAndar = (andarAtual == getTotalAndares());
         return new Batalha(jogador, inimigo, !eUltimoAndar);
+
+    }
+
+    public List<Inimigo> getInimigos() {
+        return inimigos;
     }
 
     public Heroi getJogador() {

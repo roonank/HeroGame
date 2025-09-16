@@ -45,23 +45,8 @@ public abstract class Inimigo extends Personagem implements IExperienciavel {
         experiencia -= experienciaProximoNivel;
         experienciaProximoNivel = (int) (experienciaProximoNivel * 1.5);
         pontosDisponiveis += 3;
-        // Aumento base por nível
         pontosVidaMaximos += 10;
         pontosVida = pontosVidaMaximos; // Cura completa no nível
-    }
-
-    public void distribuirPontos(String atributo, int quantidade) {
-        if (quantidade > pontosDisponiveis || quantidade <= 0) return;
-
-        switch (atributo.toLowerCase()) {
-            case "forca" -> forca += quantidade;
-            case "defesa" -> defesa += quantidade;
-            case "vida" -> {
-                pontosVidaMaximos += quantidade * 5;
-                pontosVida += quantidade * 5;
-            }
-        }
-        pontosDisponiveis -= quantidade;
     }
 
     public int getPontosDisponiveis() {

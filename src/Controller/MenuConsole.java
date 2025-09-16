@@ -3,7 +3,9 @@ package Controller;
 import model.Torre;
 import model.habilidades.Habilidade;
 import model.personagens.Heroi;
+import model.personagens.Inimigo;
 
+import java.util.Random;
 import java.util.List;
 import java.util.Scanner;
 
@@ -11,6 +13,7 @@ import static util.Cores.*;
 
 public class MenuConsole {
     private final Scanner scanner = new Scanner(System.in);
+    private Random random = new Random();
 
     public void iniciar() {
         System.out.println(AZUL + "=== TORRE DOS DEUSES ===" + RESET);
@@ -46,15 +49,18 @@ public class MenuConsole {
             if (!torre.iniciarAndar()) break;
             Batalha batalha = torre.getBatalhaAtual();
             System.out.println(AMARELO + "\n--- Andar " + torre.getAndarAtual() + " de " + torre.getTotalAndares() + " ---" + RESET);
-
+            if (torre.getAndarAtual() > 1) {
+                //List<Inimigo> inimigosRestantes = jogo.getInimigos().subList(jogo.getAndarAtual(), jogo.getTotalAndares()); evoluirInimigo(inimigosRestantes);
+                evoluirInimigo(jogo.getInimigos());
+            }
             while (!batalha.isBatalhaFinalizada()) {
                 if (batalha.isJogadorNaVez()) {
-                    System.out.println("\n" + batalha.getStatusVidaColorido());
-                    System.out.println(AMARELO + "\nEscolha a ação para " + batalha.getJogador().getNome()  + RESET);
-                    System.out.println(VERDE +"1 - Atacar");
-                    System.out.println(VERDE +"2 - Usar habilidade");
-                    System.out.println(VERDE +"3 - Defender");
-                    System.out.println(VERDE +"4 - Fugir");
+                    System.out.println("\n" + batalha.getStatusVida());
+                    System.out.println(AMARELO + "\nEscolha a ação para " + batalha.getJogador().getNome() + RESET);
+                    System.out.println(VERDE + "1 - Atacar");
+                    System.out.println(VERDE + "2 - Usar habilidade");
+                    System.out.println(VERDE + "3 - Defender");
+                    System.out.println(VERDE + "4 - Fugir");
 
                     int acao = lerOpcao(1, 4);
 
@@ -112,15 +118,16 @@ public class MenuConsole {
     }
 
     private void distribuirPontos(Heroi heroi) {
+
         while (heroi.getPontosHabilidade() > 0) {
             System.out.println(AMARELO + "\nPontos disponíveis: " + heroi.getPontosHabilidade()
-                                + "Escolha um atributo para aplicar pontos:"
-                                + "1) Força   2) Defesa   3) Vida Máx (+5)  0) Sair" + RESET);
+                    + "\nEscolha um atributo para aplicar pontos:"
+                    + "\n1) Força   2) Defesa   3) Vida Máx (+5)  0) Sair" + RESET);
 
             int op = lerOpcao(0, 3);
             if (op == 0) break;
 
-            System.out.print(AMARELO +"\nQuantos pontos deseja aplicar? (0 para cancelar)" + RESET);
+            System.out.println(AMARELO + "\nQuantos pontos deseja aplicar? (0 para cancelar)" + RESET);
             int max = heroi.getPontosHabilidade();
             int qtd = lerOpcao(0, max);
 
@@ -143,7 +150,25 @@ public class MenuConsole {
 
             System.out.printf(VERDE + "Aplicados %d ponto(s) em %s. Restam: %d%n" + RESET, qtd, nomeAttr, heroi.getPontosHabilidade());
         }
-        if (heroi.getPontosHabilidade() == 0) System.out.println("Sem pontos para distribuir.");
+        if (heroi.getPontosHabilidade() == 0) System.out.println(VERMELHO + "Sem pontos para distribuir." + RESET);
+    }
+
+    private void evoluirInimigo(List<Inimigo> inimigos) {
+        for (int i = 0; i < inimigos.size(); i++) {
+            int op = random.nextInt(3) + 1;
+            int max = inimigos.get(i).getPontosHabilidade();
+            int qtd = random.nextInt(max + 1);
+
+            if (qtd == 0 || !inimigos.get(i).gastarPontosHabilidade(qtd)) {
+                continue;
+            }
+            switch (op) {
+                case 1 -> inimigos.get(i).addForca(qtd);
+                case 2 -> inimigos.get(i).addDefesa(qtd);
+                case 3 -> inimigos.get(i).addVidaMaxima(5 * qtd);
+            }
+        }
+        System.out.println(VERDE + "Inimigos Evoluidos" + RESET);
     }
 
     private int lerOpcao(int min, int max) {
@@ -152,7 +177,8 @@ public class MenuConsole {
             try {
                 int valor = Integer.parseInt(entrada);
                 if (valor >= min && valor <= max) return valor;
-            } catch (NumberFormatException ignored) {}
+            } catch (NumberFormatException ignored) {
+            }
             System.out.print(VERMELHO + "Opção inválida, tente novamente: " + RESET);
         }
     }
