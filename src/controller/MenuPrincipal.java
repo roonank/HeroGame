@@ -1,4 +1,4 @@
-package Controller;
+package controller;
 
 import model.Torre;
 import model.personagens.Heroi;

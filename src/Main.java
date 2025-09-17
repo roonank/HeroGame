@@ -1,4 +1,4 @@
-import Controller.MenuPrincipal;
+import controller.MenuPrincipal;
 
 public class Main {
     public static void main(String[] args) {

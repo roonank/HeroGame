@@ -1,7 +1,7 @@
 package model;
 
-import Controller.Batalha;
-import Controller.Jogo;
+import controller.Batalha;
+import controller.Jogo;
 
 public class Torre {
     private final Jogo jogo;

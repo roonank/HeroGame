@@ -1,4 +1,4 @@
-package Controller;
+package controller;
 
 import model.habilidades.efeitos.Atordoado;
 import model.habilidades.efeitos.TipoEfeito;

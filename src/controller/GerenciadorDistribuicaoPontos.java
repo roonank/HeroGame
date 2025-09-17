@@ -1,4 +1,4 @@
-package Controller;
+package controller;
 
 import model.personagens.Heroi;
 import model.personagens.Inimigo;
