@@ -15,6 +15,25 @@ public class UtilitarioMenu {
         this.scanner = scanner;
     }
 
+    public <T extends Enum<T> & MenuOpcoes> T menuOpcao(String titulo, T[] valores) {
+        // Converte enum em lista de nomes
+        List<String> nomes = Arrays.stream(valores)
+                .map(MenuOpcoes::getNome)
+                .toList();
+        // Mostra menu e lê a escolha do usuário
+        int escolha = mostrarMenu(titulo, nomes);
+        // Retorna o enum escolhido
+        return valores[escolha - 1];
+    }
+
+    public int mostrarMenu(String titulo, List<String> opcoes) {
+        System.out.println(AMARELO + "\n" + titulo + RESET);
+        for (int i = 0; i < opcoes.size(); i++) {
+            System.out.printf(VERDE + "%d - %s" + RESET + "%n", i + 1, opcoes.get(i));
+        }
+        return lerOpcao(1, opcoes.size());
+    }
+
     public int lerOpcao(int min, int max) {
         while (true) {
             String entrada = scanner.nextLine().trim();
@@ -27,18 +46,6 @@ public class UtilitarioMenu {
         }
     }
 
-    public int mostrarMenu(String titulo, List<String> opcoes) {
-        System.out.println(AMARELO + "\n" + titulo + RESET);
-        for (int i = 0; i < opcoes.size(); i++) {
-            System.out.printf(VERDE + "%d - %s" + RESET + "%n", i + 1, opcoes.get(i));
-        }
-        return lerOpcao(1, opcoes.size());
-    }
 
-    public <T extends Enum<T> & MenuOpcoes> List<String> menuOpcao(T[] valores) {
-        return Arrays.stream(valores)
-                .map(MenuOpcoes::getNome)
-                .toList();
-    }
 
 }

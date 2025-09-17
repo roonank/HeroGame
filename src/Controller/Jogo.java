@@ -2,6 +2,7 @@ package Controller;
 
 import model.personagens.*;
 import model.personagens.herois.*;
+import model.personagens.inimigos.deuses.MitologiaEnum;
 import model.personagens.inimigos.deuses.egipcios.*;
 import model.personagens.inimigos.deuses.gregos.*;
 
@@ -17,7 +18,7 @@ public class Jogo {
         inimigos = new ArrayList<>();
         andarAtual = 0;
     }
-
+    /*
     public void escolherHeroi(int opcao) {
         switch (opcao) {
             case 1 -> jogador = new Aquiles();
@@ -44,6 +45,41 @@ public class Jogo {
             inimigos.add(new Hades());
             inimigos.add(new Poseidon());
             inimigos.add(new Zeus());
+        }
+        andarAtual = 0;
+    }
+
+     */
+
+    // Escolhe o herói com base no enum
+    public void escolherHeroi(HeroiEnum heroi) {
+        switch (heroi) {
+            case AQUILES -> jogador = new Aquiles();
+            case HERCULES -> jogador = new Hercules();
+            case PERSEU -> jogador = new Perseu();
+            case RAGNAR -> jogador = new Ragnar();
+            case GILGAMESH -> jogador = new Gilgamesh();
+        }
+    }
+
+    // Carrega inimigos com base na mitologia escolhida
+    public void carregarInimigos(MitologiaEnum mitologia) {
+        inimigos.clear();
+        switch (mitologia) {
+            case EGIPCIA -> {
+                inimigos.add(new Anubis());
+                inimigos.add(new Horus());
+                inimigos.add(new Isis());
+                inimigos.add(new Osiris());
+                inimigos.add(new Ra());
+            }
+            case GREGA -> {
+                inimigos.add(new Ares());
+                inimigos.add(new Atena());
+                inimigos.add(new Hades());
+                inimigos.add(new Poseidon());
+                inimigos.add(new Zeus());
+            }
         }
         andarAtual = 0;
     }

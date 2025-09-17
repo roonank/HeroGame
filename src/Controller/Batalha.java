@@ -5,6 +5,7 @@ import model.habilidades.efeitos.TipoEfeito;
 import model.habilidades.TipoHabilidade;
 import model.interfaces.ICombatente;
 import model.interfaces.IHabilidade;
+
 import static util.Cores.*;
 
 import model.personagens.Heroi;
@@ -25,19 +26,9 @@ public class Batalha {
     private final boolean premiaAoVencer;
 
     private static final Habilidade ATAQUE_BASICO =
-            new Habilidade("Ataque Básico", 0, 3,1.0, TipoEfeito.DANO, TipoHabilidade.FISICO, 0.9, 0.10);
-//            new Habilidade("Ataque Básico",
-//                    0,     // custoMana
-//                    0,     // danoBase
-//                    1.0,   // multiplicador = usa a força 1x
-//                    TipoEfeito.DANO,
-//                    TipoHabilidade.FISICO,
-//                    0,     // cooldown
-//                    0.90,  // chance de acerto (90%)
-//                    0.10   // chance de crítico (10%)
-//            );
+            new Habilidade("Ataque Básico", 0, 3, 1.0, TipoEfeito.DANO, TipoHabilidade.FISICO, 0.9, 0.10);
 
-    public enum AcaoBatalha { ATACAR, USAR_HABILIDADE, DEFENDER, FUGIR }
+    public enum AcaoBatalha {ATACAR, USAR_HABILIDADE, DEFENDER, FUGIR}
 
     public Batalha(ICombatente jogador, ICombatente inimigo, boolean premiaAoVencer) {
         this.jogador = jogador;
@@ -211,10 +202,27 @@ public class Batalha {
                 " | " + VERMELHO + inimigo.getNome() + ": " + inimigo.getVidaAtual() + "/" + inimigo.getVidaMaxima() + RESET;
     }
 
-    public List<String> getLogBatalha() { return new java.util.ArrayList<>(logBatalha); }
-    public boolean isBatalhaFinalizada() { return batalhaFinalizada; }
-    public boolean isJogadorVencedor() { return jogadorVenceu; }
-    public boolean isJogadorNaVez() { return jogadorNaVez; }
-    public ICombatente getJogador() { return jogador; }
-    public ICombatente getInimigo() { return inimigo; }
+    public List<String> getLogBatalha() {
+        return new java.util.ArrayList<>(logBatalha);
+    }
+
+    public boolean isBatalhaFinalizada() {
+        return batalhaFinalizada;
+    }
+
+    public boolean isJogadorVencedor() {
+        return jogadorVenceu;
+    }
+
+    public boolean isJogadorNaVez() {
+        return jogadorNaVez;
+    }
+
+    public ICombatente getJogador() {
+        return jogador;
+    }
+
+    public ICombatente getInimigo() {
+        return inimigo;
+    }
 }

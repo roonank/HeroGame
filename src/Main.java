@@ -1,7 +1,7 @@
-import Controller.MenuConsole;
+import Controller.MenuPrincipal;
 
 public class Main {
     public static void main(String[] args) {
-        new MenuConsole().iniciar();
+        new MenuPrincipal().iniciar();
     }
 }

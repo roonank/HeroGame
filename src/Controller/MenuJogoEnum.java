@@ -4,9 +4,9 @@ import model.interfaces.MenuOpcoes;
 
 public enum MenuJogoEnum implements MenuOpcoes {
     ATACAR("Atacar"),
-    USARHABILIDADE("Usar habilidade"),
+    USAR_HABILIDADE("Usar habilidade"),
     DEFENDER("Defender"),
-    FUGIT("Fugir");
+    FUGIR("Fugir");
 
     private final String nome;
 
