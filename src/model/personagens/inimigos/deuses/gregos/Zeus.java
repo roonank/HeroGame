@@ -16,8 +16,8 @@ public class Zeus extends MagoInimigo {
                 Arrays.asList(
                         new Habilidade("Sabedoria Suprema", TipoHabilidade.MAGICO,
                                 25, 3, 0.95, TipoEfeito.DANO),
-                        new Habilidade("Chama Destruidora", TipoHabilidade.MAGICO,
-                                40, 4, 0.99, TipoEfeito.DANO),
+                        new Habilidade("Choque Destruidor", TipoHabilidade.MAGICO,
+                                40, 4, 0.99, TipoEfeito.STUN).comEfeito(2, 0.6, 1.5),
                         new Habilidade("Desolação Divina", TipoHabilidade.MAGICO,
                                 35, 5, 0.85, TipoEfeito.DANO)
                 ));
@@ -33,7 +33,7 @@ public class Zeus extends MagoInimigo {
     @Override
     public void usarHabilidade(Habilidade habilidade, model.interfaces.ICombatente alvo) {
         if (!podeUsarHabilidade(habilidade)) {
-            System.out.println(AMARELO + "\nAquiles não pode usar esta habilidade!" + RESET);
+            System.out.println(AMARELO + "\nZeus não pode usar esta habilidade!" + RESET);
             return;
         }
         if (!(alvo instanceof Personagem)) {

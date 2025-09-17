@@ -19,7 +19,7 @@ public class Hades extends GuerreiroInimigo {
                         new Habilidade("Toque da Morte", TipoHabilidade.FISICO,
                                 40, 3, 0.85, TipoEfeito.DANO), // 16 * 2.5
                         new Habilidade("Punho do Submundo", TipoHabilidade.FISICO,
-                                48, 4, 0.75, TipoEfeito.DANO) // 16 * 3
+                                48, 4, 0.75, TipoEfeito.QUEIMACAO).comEfeito(1, 0.7, 1) // 16 * 3
                 ));
     }
 
@@ -32,7 +32,7 @@ public class Hades extends GuerreiroInimigo {
     @Override
     public void usarHabilidade(Habilidade habilidade, model.interfaces.ICombatente alvo) {
         if (!podeUsarHabilidade(habilidade)) {
-            System.out.println(AMARELO + "\nAquiles não pode usar esta habilidade!" + RESET);
+            System.out.println(AMARELO + "\nHades não pode usar esta habilidade!" + RESET);
             return;
         }
         if (!(alvo instanceof Personagem)) {

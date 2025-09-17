@@ -33,7 +33,7 @@ public class Poseidon extends MagoInimigo {
     @Override
     public void usarHabilidade(Habilidade habilidade, model.interfaces.ICombatente alvo) {
         if (!podeUsarHabilidade(habilidade)) {
-            System.out.println(AMARELO + "\nAquiles não pode usar esta habilidade!" + RESET);
+            System.out.println(AMARELO + "\nPoseidon não pode usar esta habilidade!" + RESET);
             return;
         }
         if (!(alvo instanceof Personagem)) {
