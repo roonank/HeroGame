@@ -2,7 +2,7 @@ package controller;
 
 import model.habilidades.efeitos.Atordoado;
 import model.habilidades.efeitos.TipoEfeito;
-import model.habilidades.TipoHabilidade;
+import model.habilidades.Emun.TipoHabilidade;
 import model.interfaces.ICombatente;
 import model.interfaces.IHabilidade;
 

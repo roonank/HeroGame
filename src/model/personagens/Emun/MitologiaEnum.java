@@ -1,4 +1,4 @@
-package model.personagens.inimigos.deuses;
+package model.personagens.Emun;
 
 import model.interfaces.MenuOpcoes;
 

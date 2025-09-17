@@ -2,7 +2,7 @@ package model.personagens.herois;
 
 import model.habilidades.Habilidade;
 import model.habilidades.efeitos.TipoEfeito;
-import model.habilidades.TipoHabilidade;
+import model.habilidades.Emun.TipoHabilidade;
 import model.personagens.Mago;
 import model.personagens.Personagem;
 

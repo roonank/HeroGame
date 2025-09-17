@@ -2,8 +2,8 @@ package controller;
 
 import model.Torre;
 import model.personagens.Heroi;
-import model.personagens.herois.HeroiEnum;
-import model.personagens.inimigos.deuses.MitologiaEnum;
+import model.personagens.Emun.HeroiEnum;
+import model.personagens.Emun.MitologiaEnum;
 
 import java.util.Scanner;
 

@@ -1,4 +1,5 @@
 package model.habilidades;
+import model.habilidades.Emun.TipoHabilidade;
 import model.habilidades.efeitos.TipoEfeito;
 
 public class Habilidade {

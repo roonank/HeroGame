@@ -2,7 +2,7 @@ package model.personagens.inimigos.deuses.egipcios;
 
 import model.habilidades.Habilidade;
 import model.habilidades.efeitos.TipoEfeito;
-import model.habilidades.TipoHabilidade;
+import model.habilidades.Emun.TipoHabilidade;
 import model.personagens.GuerreiroInimigo;
 import model.personagens.Personagem;
 

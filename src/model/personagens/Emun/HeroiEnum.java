@@ -1,4 +1,4 @@
-package model.personagens.herois;
+package model.personagens.Emun;
 
 import model.interfaces.MenuOpcoes;
 

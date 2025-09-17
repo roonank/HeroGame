@@ -2,7 +2,7 @@ package model.personagens;
 
 import calculadora.CalculoDano;
 import model.habilidades.Habilidade;
-import model.habilidades.TipoHabilidade;
+import model.habilidades.Emun.TipoHabilidade;
 
 import java.util.List;
 

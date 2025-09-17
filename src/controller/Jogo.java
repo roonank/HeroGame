@@ -1,8 +1,9 @@
 package controller;
 
 import model.personagens.*;
+import model.personagens.Emun.HeroiEnum;
 import model.personagens.herois.*;
-import model.personagens.inimigos.deuses.MitologiaEnum;
+import model.personagens.Emun.MitologiaEnum;
 import model.personagens.inimigos.deuses.egipcios.*;
 import model.personagens.inimigos.deuses.gregos.*;
 
