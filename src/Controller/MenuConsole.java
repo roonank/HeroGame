@@ -3,9 +3,10 @@ package Controller;
 import model.Torre;
 import model.habilidades.Habilidade;
 import model.personagens.Heroi;
-import model.personagens.Inimigo;
+import model.personagens.herois.HeroiEnum;
+import model.personagens.inimigos.deuses.MitologiaEnum;
 
-import java.util.Random;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -13,30 +14,21 @@ import static util.Cores.*;
 
 public class MenuConsole {
     private final Scanner scanner = new Scanner(System.in);
-    private final Random random = new Random();
     UtilitarioMenu utilitario = new UtilitarioMenu(scanner);
     GerenciadorDistribuicaoPontos gerenciador = new GerenciadorDistribuicaoPontos(utilitario);
 
     public void iniciar() {
         System.out.println(AZUL + "=== TOWER OF TRIALS ===" + RESET);
         Jogo jogo = new Jogo();
-        List<String> herois = List.of(
-                "Aquiles",//new Aquiles(),
-                "Hércules",//new Hercules(),
-                "Perseu",//new Perseu(),
-                "Ragnar",//new Ragnar(),
-                "Gilgamesh"//new Gilgamesh()
-        );
-        System.out.println(AMARELO + "\nEscolha seu herói:" + RESET);
-        for (int i = 0; i < herois.size(); i++) {
-            System.out.println(VERDE + "" + (i + 1) + " - " + herois.get(i) + RESET);
-        }
-        jogo.escolherHeroi(utilitario.lerOpcao(1, herois.size()));
+
+        //Defini o heroi para iniciar o jogo
+        int escolhaHeroi = utilitario.mostrarMenu("Escolha seu herói:", utilitario.menuOpcao(HeroiEnum.values()));
+        jogo.escolherHeroi(escolhaHeroi);
         Heroi heroiEscolhido = jogo.getJogador();
-        System.out.println(AMARELO + "\nEscolha a mitologia:" + RESET);
-        System.out.println(VERDE + "1 - Egípcia" + RESET);
-        System.out.println(VERDE + "2 - Grega" + RESET);
-        jogo.carregarInimigos(utilitario.lerOpcao(1, 2));
+
+        //Defini a mitologia para iniciar o jogo
+        int escolhaMitologia = utilitario.mostrarMenu("Escolha uma mitologia:", utilitario.menuOpcao(MitologiaEnum.values()));
+        jogo.carregarInimigos(escolhaMitologia);
 
         Torre torre = new Torre(jogo);
 
@@ -44,21 +36,18 @@ public class MenuConsole {
             if (!torre.iniciarAndar()) break;
             Batalha batalha = torre.getBatalhaAtual();
 
+            //Evolui o inimigo conforme ocorre cada batalha
             if (torre.getAndarAtual() > 1) {
                 gerenciador.evoluirInimigos(jogo.getInimigos());
             }
+
             System.out.println(AMARELO + "\n--- Andar " + torre.getAndarAtual() + " de " + torre.getTotalAndares() + " ---" + RESET);
 
             while (!batalha.isBatalhaFinalizada()) {
                 if (batalha.isJogadorNaVez()) {
                     System.out.println("\n" + batalha.getStatusVida());
-                    System.out.println(AMARELO + "\nEscolha a ação para " + batalha.getJogador().getNome() + RESET);
-                    System.out.println(VERDE + "1 - Atacar");
-                    System.out.println(VERDE + "2 - Usar habilidade");
-                    System.out.println(VERDE + "3 - Defender");
-                    System.out.println(VERDE + "4 - Fugir" + RESET);
 
-                    int acao = utilitario.lerOpcao(1, 4);
+                    int acao = utilitario.mostrarMenu("Escolha a ação para:" +  batalha.getJogador().getNome(), utilitario.menuOpcao(MenuJogoEnum.values()));
 
                     switch (acao) {
                         case 1:
@@ -89,7 +78,7 @@ public class MenuConsole {
                     }
                 } else {
                     System.out.println(VERMELHO + "\n--- Vez de " + batalha.getInimigo().getNome() + " ---" + RESET);
-                    batalha.executarTurno(null, null); // Ação do inimigo é decidida internamente
+                    batalha.executarTurno(null, null);
                 }
 
                 for (String log : batalha.getLogBatalha()) {
@@ -106,10 +95,8 @@ public class MenuConsole {
             boolean podeDistribuir = (torre.getAndarAtual() < jogo.getTotalAndares()) && (heroiEscolhido.getPontosDisponiveis() > 0);
             if (podeDistribuir) {
                 gerenciador.evoluirHeroi(jogo.getJogador());
-                //distribuirPontos(jogo.getJogador());
             }
         }
-
         if (jogo.getJogador().estaVivo())
             System.out.println(AZUL + "\nParabéns! Você conquistou a Torre dos Deuses!" + RESET);
     }

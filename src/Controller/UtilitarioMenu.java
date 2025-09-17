@@ -1,5 +1,9 @@
 package Controller;
 
+import model.interfaces.MenuOpcoes;
+
+import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 
 import static util.Cores.*;
@@ -22,4 +26,19 @@ public class UtilitarioMenu {
             System.out.print(VERMELHO + "Opção inválida, tente novamente: " + RESET);
         }
     }
+
+    public int mostrarMenu(String titulo, List<String> opcoes) {
+        System.out.println(AMARELO + "\n" + titulo + RESET);
+        for (int i = 0; i < opcoes.size(); i++) {
+            System.out.printf(VERDE + "%d - %s" + RESET + "%n", i + 1, opcoes.get(i));
+        }
+        return lerOpcao(1, opcoes.size());
+    }
+
+    public <T extends Enum<T> & MenuOpcoes> List<String> menuOpcao(T[] valores) {
+        return Arrays.stream(valores)
+                .map(MenuOpcoes::getNome)
+                .toList();
+    }
+
 }

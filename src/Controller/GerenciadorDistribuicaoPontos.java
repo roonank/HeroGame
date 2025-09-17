@@ -29,7 +29,7 @@ public class GerenciadorDistribuicaoPontos {
                 int op = utilitario.lerOpcao(0, 3);
                 if (op == 0) break;
 
-                System.out.println(AMARELO + "\nQuantos pontos deseja aplicar? Heroi " +
+                System.out.println(AMARELO + "Quantos pontos deseja aplicar? Heroi " +
                         heroi.getNome() + " tem " +
                         heroi.getPontosHabilidade() + " pontos para utlizar " +
                         "(0 para cancelar)" + RESET);
