@@ -1,16 +1,70 @@
 package model.personagens.herois;
 
-import model.personagens.Atributos;
+import model.habilidades.Habilidade;
+import model.habilidades.efeitos.TipoEfeito;
+import model.habilidades.Emun.TipoHabilidade;
+import model.personagens.Mago;
 import model.personagens.Personagem;
-import model.personagens.Status;
 
-public class Gilgamesh extends Personagem {
+import java.util.Arrays;
+
+import static util.Cores.*;
+
+public class Gilgamesh extends Mago {
 
     public Gilgamesh() {
-        super(
-                "Gilgamesh",
-                new Atributos(10, 8, 17, 5),
-                new Status(new Atributos(10, 8, 17, 5))
-        );
+        super("Gilgamesh", 100, 14, 10, 90,
+                Arrays.asList(
+                        new Habilidade("Cetro de Ur", TipoHabilidade.MAGICO,
+                                35, 5, 0.9, TipoEfeito.DANO), // 14 * 2.5
+                        new Habilidade("Projéteis de Argila", TipoHabilidade.MAGICO,
+                                42, 6, 0.85, TipoEfeito.DANO), // 14 * 3
+                        new Habilidade("Fúria da Mesopotâmia", TipoHabilidade.MAGICO,
+                                49, 7, 0.8, TipoEfeito.DANO) // 14 * 3.5
+                ));
+    }
+
+    @Override
+    public boolean podeUsarHabilidade(Habilidade habilidade) {
+        // Gilgamesh pode usar habilidades mágicas se tiver mana suficiente
+        return habilidade.getTipo() == TipoHabilidade.MAGICO &&
+                getPontosMagia() >= habilidade.getCustoMana();
+    }
+
+    @Override
+    public void usarHabilidade(Habilidade habilidade, model.interfaces.ICombatente alvo) {
+        if (!podeUsarHabilidade(habilidade)) {
+            System.out.println(AMARELO + "\nGilgamesh não pode usar esta habilidade!" + RESET);
+            return;
+        }
+        if (!(alvo instanceof Personagem)) {
+            System.out.println(AMARELO + "\nAlvo inválido para " + habilidade.getNome() + "!" + RESET);
+            return;
+        }
+
+        int custo = habilidade.getCustoMana();
+        if (!temMana(custo)){
+            System.out.printf(AMARELO + "\nMana insuficiente! (%d/%d) - %s custa %d." + RESET + getManaAtual(), getManaMaxima(), habilidade.getNome(), custo);
+            return;
+        }
+
+        gastarMana(custo);
+
+        Personagem defensor = (Personagem) alvo;
+
+        calculadora.ResultadoAtaque r = calculadora.CalculoDano.calcularDetalhado(this, defensor, habilidade);
+
+        if (!r.acertou()) {
+            System.out.printf(AMARELO + "%s usa %s mas ERRA (chance %.0f%%)!" + RESET + "%n",
+                    getNome(), habilidade.getNome(), r.chanceAcertoUsada() * 100);
+            return;
+        }
+
+        if (r.critico()) {
+            System.out.printf(VERMELHO + "CRÍTICO x%.2f! " + RESET, r.multiplicadorCritico());
+        }
+
+        int danoAplicado = defensor.receberDano(r.dano());
+        System.out.printf(AMARELO + "%n%s executa %s e causa %d de dano! " + RESET, getNome(), habilidade.getNome(), danoAplicado);
     }
 }
