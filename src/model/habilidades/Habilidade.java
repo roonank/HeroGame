@@ -1,54 +1,66 @@
 package model.habilidades;
-
-import model.habilidades.TipoEfeito;
+import model.habilidades.Emun.TipoHabilidade;
+import model.habilidades.efeitos.TipoEfeito;
 
 public class Habilidade {
-    private String nome;
-    private String descricao;
-    private int custoMana;        // custo de energia/mana/estamina
-    private int danoBase;         // dano inicial
-    private double multiplicador; // multiplicador do ataque do personagem
-    private TipoEfeito tipoEfeito; // tipo do efeito (dano, cura, buff, debuff)
-    private int duracao;          // quantos turnos dura (para buffs/debuffs)
-    private double chanceAcerto;  // chance de acertar (0.0 - 1.0)
-    private double chanceCritico; // chance de crítico
-    private boolean ultimate;     // se é uma habilidade única/ultimate
+    private final String nome;
+    private final int custoMana;
+    private final int danoBase;
+    private final double multiplicador;
+    private final TipoEfeito tipoEfeito;
+    private final TipoHabilidade tipo;
+    private final double chanceAcerto;
+    private final double chanceCritico;
+    private int duracaoEfeito = 0;
+    private double chanceEfeito = 0.0;
+    private double poderEfeito = 0.0;
 
-    public Habilidade(String nome, String descricao, int custoMana, int danoBase,
-                      double multiplicador, TipoEfeito tipoEfeito, int duracao,
-                      double chanceAcerto, double chanceCritico, boolean ultimate) {
+    public Habilidade(String nome, int custoMana, int danoBase, double multiplicador, TipoEfeito tipoEfeito,
+                      TipoHabilidade tipo, double chanceAcerto, double chanceCritico) {
         this.nome = nome;
-        this.descricao = descricao;
         this.custoMana = custoMana;
         this.danoBase = danoBase;
         this.multiplicador = multiplicador;
         this.tipoEfeito = tipoEfeito;
-        this.duracao = duracao;
+        this.tipo = tipo;
         this.chanceAcerto = chanceAcerto;
         this.chanceCritico = chanceCritico;
-        this.ultimate = ultimate;
     }
 
-    // --- Métodos de uso ---
-    public int calcularDano(int ataquePersonagem) {
-        int dano = (int) (danoBase + ataquePersonagem * multiplicador);
+    public Habilidade(String nome, TipoHabilidade tipo, int custoMana, int danoBase, double multiplicador, TipoEfeito tipoEfeito) {
+        this.nome = nome;
+        this.tipo = tipo;
+        this.custoMana = custoMana;
+        this.danoBase = danoBase;
+        this.multiplicador = multiplicador;
+        this.tipoEfeito = tipoEfeito;
+        this.chanceAcerto = 1.0;
+        this.chanceCritico = 0.0;
+    }
 
-        // Crítico
-        if (Math.random() < chanceCritico) {
-            dano *= 2;
-        }
-        return dano;
+
+    public Habilidade comEfeito(int duracao, double chance, double poder) {
+        this.duracaoEfeito = Math.max(0, duracao);
+        this.chanceEfeito = Math.max(0.0, Math.min(1.0, chance));
+        this.poderEfeito = Math.max(0.0, poder);
+        return this;
     }
 
     public boolean acertou() {
         return Math.random() < chanceAcerto;
     }
 
-    // Getters
-    public String getNome() { return nome; }
-    public String getDescricao() { return descricao; }
-    public int getCustoMana() { return custoMana; }
+    public int getDuracaoEfeito() { return duracaoEfeito; }
+    public double getChanceEfeito() { return chanceEfeito; }
+    public double getPoderEfeito() { return poderEfeito; }
     public TipoEfeito getTipoEfeito() { return tipoEfeito; }
-    public int getDuracao() { return duracao; }
-    public boolean isUltimate() { return ultimate; }
+    public int getDanoBase() { return danoBase; }
+    public double getMultiplicador() { return multiplicador; }
+    public double getChanceAcerto() { return chanceAcerto; }
+    public double getChanceCritico() { return chanceCritico; }
+    public String getNome() { return nome; }
+    public int getCustoMana() { return custoMana; }
+    public TipoHabilidade getTipo() {
+        return tipo;
+    }
 }

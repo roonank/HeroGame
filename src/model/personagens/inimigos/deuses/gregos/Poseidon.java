@@ -1,39 +1,39 @@
-package model.personagens.herois;
+package model.personagens.inimigos.deuses.gregos;
 
 import model.habilidades.Habilidade;
 import model.habilidades.efeitos.TipoEfeito;
 import model.habilidades.Emun.TipoHabilidade;
-import model.personagens.Guerreiro;
+import model.personagens.MagoInimigo;
 import model.personagens.Personagem;
 
 import static util.Cores.*;
-
 import java.util.Arrays;
 
-public class Hercules extends Guerreiro {
+public class Poseidon extends MagoInimigo {
 
-    public Hercules() {
-        super("Hércules", 100, 18, 10,
+    public Poseidon() {
+        super("Poseidon", 100, 12, 8, 90, // Mais vida e força que Atena, menos mana
                 Arrays.asList(
-                        new Habilidade("Golpe Poderoso", TipoHabilidade.FISICO,
-                                36, 2, 0.9, TipoEfeito.DANO), // 18 * 2
-                        new Habilidade("Força de Titã", TipoHabilidade.FISICO,
-                                45, 3, 0.85, TipoEfeito.DANO), // 18 * 2.5
-                        new Habilidade("Punhos dos Deuses", TipoHabilidade.FISICO,
-                                54, 4, 0.75, TipoEfeito.DANO) // 18 * 3
+                        new Habilidade("Tridente dos Mares", TipoHabilidade.MAGICO,
+                                30, 4, 0.9, TipoEfeito.DANO), // 12 * 2.5
+                        new Habilidade("Tsunami Devastador", TipoHabilidade.MAGICO,
+                                36, 5, 0.85, TipoEfeito.DANO), // 12 * 3
+                        new Habilidade("Fúria dos Oceanos", TipoHabilidade.MAGICO,
+                                42, 6, 0.8, TipoEfeito.DANO) // 12 * 3.5
                 ));
     }
 
     @Override
     public boolean podeUsarHabilidade(Habilidade habilidade) {
-        // Hércules pode usar qualquer habilidade física
-        return habilidade.getTipo() == TipoHabilidade.FISICO;
+        // Poseidon pode usar habilidades mágicas se tiver mana suficiente
+        return habilidade.getTipo() == TipoHabilidade.MAGICO &&
+                getPontosMagia() >= habilidade.getCustoMana();
     }
 
     @Override
     public void usarHabilidade(Habilidade habilidade, model.interfaces.ICombatente alvo) {
         if (!podeUsarHabilidade(habilidade)) {
-            System.out.println(AMARELO + "\nHércules não pode usar esta habilidade!" + RESET);
+            System.out.println(AMARELO + "\nPoseidon não pode usar esta habilidade!" + RESET);
             return;
         }
         if (!(alvo instanceof Personagem)) {
@@ -66,5 +66,4 @@ public class Hercules extends Guerreiro {
         int danoAplicado = defensor.receberDano(r.dano());
         System.out.printf(AMARELO + "%n%s executa %s e causa %d de dano! " + RESET, getNome(), habilidade.getNome(), danoAplicado);
     }
-
 }
