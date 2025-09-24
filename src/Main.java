@@ -1,7 +1,7 @@
-import controller.MenuPrincipal;
+import controller.MenuPrincipalSwing;
 
 public class Main {
     public static void main(String[] args) {
-        new MenuPrincipal().iniciar();
+        javax.swing.SwingUtilities.invokeLater(() -> new MenuPrincipalSwing().setVisible(true));
     }
 }
